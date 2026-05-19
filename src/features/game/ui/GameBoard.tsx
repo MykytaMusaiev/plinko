@@ -1,9 +1,11 @@
-import React from 'react'
+'use client';
 
-const GameBoard = () => {
+import { PegGrid } from './PegGrid';
+
+export function GameBoard() {
   return (
-    <div>GameBoard</div>
-  )
+    <section className="relative w-full max-w-md">
+      <PegGrid rows={8} />
+    </section>
+  );
 }
-
-export default GameBoard

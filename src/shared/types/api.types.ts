@@ -34,19 +34,20 @@ export interface BetSeedRef {
     nonce: number;
 }
 
-// Partially known — will be extended after first real bet test
+// Verified against real POST /api/v1/bets response
+// TODO(types): Re-verify full shape after GET /api/v1/bets is tested — fields may expand
 export interface BetResponse {
-    id: string;
-    amount: number;
+    betId: string;
+    amount: string;
     rows: number;
     risk: Risk;
     path: string;
     bucketIndex: number;
-    multiplier: number;
+    multiplier: string;
     payout: string;
     balanceAfter: string;
-    createdAt: string;
-    seed?: BetSeedRef;
+    createdAt?: string; // present in list responses, absent in POST response
+    seed: BetSeedRef;
 }
 
 export interface BetListResponse {
