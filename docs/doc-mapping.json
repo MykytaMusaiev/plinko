@@ -1,0 +1,135 @@
+{
+  "version": 1,
+  "mappings": [
+    {
+      "sourceGlob": "src/features/auth/**",
+      "relatedDocs": [
+        "docs/modules/auth.md",
+        "docs/api-boundary.md"
+      ],
+      "requiredOnChange": true,
+      "reason": "Auth feature changes affect the auth module docs; API-boundary docs are required when auth/API boundary behavior changes.",
+      "architectureSensitive": true
+    },
+    {
+      "sourceGlob": "src/app/api/auth/**",
+      "relatedDocs": [
+        "docs/modules/auth.md",
+        "docs/api-boundary.md",
+        "docs/decisions/001-bff-auth-boundary.md"
+      ],
+      "requiredOnChange": true,
+      "reason": "Auth BFF route changes affect route behavior, token handling, and the accepted BFF auth boundary decision.",
+      "architectureSensitive": true
+    },
+    {
+      "sourceGlob": "src/shared/server/**",
+      "relatedDocs": [
+        "docs/api-boundary.md",
+        "docs/decisions/001-bff-auth-boundary.md"
+      ],
+      "requiredOnChange": true,
+      "reason": "Server-only helpers own backend access, API_BASE, auth cookies, and backend refresh/retry behavior.",
+      "architectureSensitive": true
+    },
+    {
+      "sourceGlob": "src/shared/lib/apiFetch.ts",
+      "relatedDocs": [
+        "docs/api-boundary.md"
+      ],
+      "requiredOnChange": true,
+      "reason": "apiFetch defines the browser-to-BFF call boundary and retry behavior visible to browser clients.",
+      "architectureSensitive": true
+    },
+    {
+      "sourceGlob": "src/features/game/**",
+      "relatedDocs": [
+        "docs/modules/game.md"
+      ],
+      "requiredOnChange": true,
+      "reason": "Game feature changes affect manual flow, game state, board animation, controls, or config loading documentation.",
+      "architectureSensitive": false
+    },
+    {
+      "sourceGlob": "src/features/game/api/bets.api.ts",
+      "relatedDocs": [
+        "docs/modules/bets.md",
+        "docs/api-boundary.md"
+      ],
+      "requiredOnChange": true,
+      "reason": "Browser bet API wrapper changes affect bets module behavior and may affect the local BFF boundary.",
+      "architectureSensitive": true
+    },
+    {
+      "sourceGlob": "src/app/api/bets/**",
+      "relatedDocs": [
+        "docs/modules/bets.md",
+        "docs/api-boundary.md"
+      ],
+      "requiredOnChange": true,
+      "reason": "Bets BFF route changes affect backend proxy behavior, auth requirements, and documented bets endpoints.",
+      "architectureSensitive": true
+    },
+    {
+      "sourceGlob": "src/features/history/**",
+      "relatedDocs": [
+        "docs/modules/history.md"
+      ],
+      "requiredOnChange": true,
+      "reason": "History feature changes affect planned or implemented history module behavior.",
+      "architectureSensitive": false
+    },
+    {
+      "sourceGlob": "src/features/fair/**",
+      "relatedDocs": [
+        "docs/modules/fair.md"
+      ],
+      "requiredOnChange": true,
+      "reason": "Fairness feature changes affect planned or implemented fair module behavior.",
+      "architectureSensitive": false
+    },
+    {
+      "sourceGlob": "src/shared/types/api.types.ts",
+      "relatedDocs": [
+        "docs/modules/auth.md",
+        "docs/modules/game.md",
+        "docs/modules/bets.md",
+        "docs/modules/history.md",
+        "docs/modules/fair.md",
+        "docs/api-boundary.md"
+      ],
+      "requiredOnChange": true,
+      "reason": "Shared API type changes may affect any module that documents backend request or response shapes.",
+      "architectureSensitive": true
+    },
+    {
+      "sourceGlob": "package.json",
+      "relatedDocs": [
+        "AGENTS.md",
+        "docs/architecture.md",
+        "docs/workflow/definition-of-done.md"
+      ],
+      "requiredOnChange": true,
+      "reason": "Package, dependency, and script changes affect repository operating rules, stack docs, and validation expectations.",
+      "architectureSensitive": true
+    },
+    {
+      "sourceGlob": "scripts/**",
+      "relatedDocs": [
+        "docs/workflow/definition-of-done.md"
+      ],
+      "requiredOnChange": true,
+      "reason": "Validation or automation script changes affect definition-of-done expectations.",
+      "architectureSensitive": false
+    },
+    {
+      "sourceGlob": "skills/**",
+      "relatedDocs": [
+        "docs/workflow/codex-task-flow.md"
+      ],
+      "requiredOnChange": true,
+      "reason": "Repo-local skill changes affect Codex task flow and agent operating expectations.",
+      "architectureSensitive": false
+    }
+  ]
+}
