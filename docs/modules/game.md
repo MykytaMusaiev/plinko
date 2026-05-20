@@ -27,6 +27,7 @@ Implemented:
   `lastResult`, and stops playing state.
 - `MultiplierBar` reads `winningBucketIndex` from game state to show the
   winning bucket highlight.
+- `UserHeader` links the History control to the authenticated `/history` page.
 
 Current constraints:
 

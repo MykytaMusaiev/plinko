@@ -15,6 +15,7 @@ Implemented:
   - `src/app/(auth)/login`
   - `src/app/(auth)/register`
   - `src/app/(game)/game`
+  - `src/app/(game)/history`
 - Next.js BFF route handlers live under `src/app/api`.
 - Root providers in `src/app/providers.tsx` configure TanStack Query, auth
   hydration, and Sonner toasts.
@@ -27,7 +28,8 @@ Feature folders:
   login/register UI.
 - `src/features/game` contains manual game controls, board rendering, game
   state, config loading, and bet placement integration.
-- `src/features/history` exists but current files are empty.
+- `src/features/history` contains the responsive authenticated bet history page
+  UI and API wrapper for the existing local bets endpoint.
 - `src/features/fair` exists but current files are empty.
 
 Shared layers:

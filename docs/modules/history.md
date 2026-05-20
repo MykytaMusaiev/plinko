@@ -1,4 +1,4 @@
-Status: Planned
+Status: Partial
 Owner: Frontend
 Source of truth: src/features/history
 Last verified: 2026-05-20
@@ -8,19 +8,28 @@ Related files: src/features/history/api/history.api.ts, src/features/history/ui/
 
 Planned:
 
-- History module files exist but are currently empty.
-- No implemented history UI behavior is documented in source.
-- No implemented history API wrapper is documented in source.
+- Pagination, load-more, and endless scroll are not implemented.
+- Row detail drawer behavior is not implemented.
 
-Related existing capability:
+Implemented:
 
-- `betsApi.list` can request local `/api/bets` with optional pagination/filter
-  parameters.
-- `GET /api/bets` exists as a BFF route.
+- `/history` is a separate authenticated App Router page.
+- The game header History control navigates to `/history`.
+- The page uses a standalone dark layout with a top header, Back to Game link,
+  Bet History title, compact filters bar, and loading/empty/error/populated
+  states.
+- `historyApi.listBets` delegates to the existing `betsApi.list` wrapper, so
+  browser code still calls local `/api/bets`.
+- TanStack Query owns history list server state.
+- The first version requests a bounded list and does not implement pagination.
+- Rows filtering is sent through the existing `rows` query parameter.
+- Risk filtering is client-side only because backend Risk filtering support is
+  not verified.
+- Desktop renders a table-like layout; mobile renders compact cards to avoid
+  horizontal overflow on narrow screens.
 
 Unverified:
 
-- Final history UX.
-- Backend list response details beyond current `BetListResponse`.
-- Whether history will use `src/features/history/api/history.api.ts` or reuse
-  the existing bets API wrapper.
+- Backend Risk filtering support.
+- Non-null cursor behavior and pagination semantics.
+- Row detail drawer requirements.

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
 import { History } from 'lucide-react';
 import { useAuthStore } from '@/features/auth/model/auth.store';
 import { formatCredits } from '@/shared/lib/bigint';
@@ -42,13 +43,14 @@ export function UserHeader() {
         </span>
       </div>
 
-      <button
+      <Link
+        href="/history"
         className="flex items-center gap-1.5 text-xs text-neutral-400 hover:text-white transition-colors"
         aria-label="Bet history"
       >
         <History size={14} />
         History
-      </button>
+      </Link>
     </header>
   );
 }
