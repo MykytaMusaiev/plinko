@@ -21,12 +21,12 @@ export function useRegister({
     onUnexpectedError,
 }: UseRegisterOptions) {
     const router = useRouter();
-    const setAuth = useAuthStore((s) => s.setAuth);
+    const setSession = useAuthStore((state) => state.setSession);
 
     return useMutation<void, Error, RegisterVariables>({
         mutationFn: async ({ email, password }) => {
             const data = await authApi.register(email, password);
-            setAuth(data);
+            setSession(data);
         },
         onSuccess: () => {
             router.push("/game");

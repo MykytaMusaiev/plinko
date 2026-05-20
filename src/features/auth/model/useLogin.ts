@@ -22,12 +22,12 @@ export function useLogin({
 }: UseLoginOptions) {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const setAuth = useAuthStore((s) => s.setAuth);
+    const setSession = useAuthStore((state) => state.setSession);
 
     return useMutation<void, Error, LoginVariables>({
         mutationFn: async ({ email, password }) => {
             const data = await authApi.login(email, password);
-            setAuth(data);
+            setSession(data);
         },
         onSuccess: () => {
             router.push(searchParams.get("from") ?? "/game");

@@ -1,25 +1,31 @@
 import { NextRequest, NextResponse } from "next/server";
-
-const API = process.env.API_BASE ?? "https://plinko-be-stanish.fly.dev";
+import {
+    ACCESS_TOKEN_COOKIE,
+    REFRESH_TOKEN_COOKIE,
+    clearAuthCookies,
+} from "@/shared/server/authCookies";
+import { API_BASE } from "@/shared/server/env";
 
 export async function POST(req: NextRequest) {
-    const refreshToken = req.cookies.get("refreshToken")?.value;
-    const authorization = req.headers.get("Authorization");
+    const accessToken = req.cookies.get(ACCESS_TOKEN_COOKIE)?.value;
+    const refreshToken = req.cookies.get(REFRESH_TOKEN_COOKIE)?.value;
 
-    if (refreshToken && authorization) {
-        await fetch(`${API}/api/v1/auth/logout`, {
+    if (accessToken && refreshToken) {
+        await fetch(`${API_BASE}/api/v1/auth/logout`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                Authorization: authorization,
+                Authorization: `Bearer ${accessToken}`,
             },
             body: JSON.stringify({ refreshToken }),
         }).catch(() => {
-            // best-effort: always clear cookie regardless
+            // best-effort logout: local cookies are cleared regardless
         });
     }
 
     const response = new NextResponse(null, { status: 204 });
-    response.cookies.delete("refreshToken");
+
+    clearAuthCookies(response);
+
     return response;
 }

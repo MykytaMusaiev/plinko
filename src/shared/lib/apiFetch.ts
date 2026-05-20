@@ -1,4 +1,8 @@
 import { useAuthStore } from "@/features/auth/model/auth.store";
+import type {
+    ApiErrorBody,
+    AuthSessionResponse,
+} from "@/shared/types/api.types";
 
 export class ApiError extends Error {
     constructor(
@@ -12,60 +16,101 @@ export class ApiError extends Error {
     }
 }
 
-const API_BASE =
-    process.env.NEXT_PUBLIC_API_BASE ?? "https://plinko-be-stanish.fly.dev";
+let refreshPromise: Promise<void> | null = null;
 
-let refreshPromise: Promise<string> | null = null;
+function isApiPath(path: string): boolean {
+    return path.startsWith("/api/");
+}
 
-async function doRefresh(): Promise<string> {
-    const res = await fetch("/api/auth/refresh", { method: "POST" });
-    if (!res.ok) throw new Error("Refresh failed");
-    const data: { accessToken: string } = await res.json();
-    useAuthStore.getState().setAccessToken(data.accessToken);
-    return data.accessToken;
+function isAuthPath(path: string): boolean {
+    return path.startsWith("/api/auth");
+}
+
+function toErrorBody(body: unknown, fallbackPath: string): ApiErrorBody {
+    if (!body || typeof body !== "object") {
+        return {
+            statusCode: 500,
+            message: "Unknown error",
+            error: "",
+            path: fallbackPath,
+        };
+    }
+
+    const candidate = body as Partial<ApiErrorBody>;
+
+    return {
+        statusCode:
+            typeof candidate.statusCode === "number"
+                ? candidate.statusCode
+                : 500,
+        message:
+            typeof candidate.message === "string"
+                ? candidate.message
+                : "Unknown error",
+        error: typeof candidate.error === "string" ? candidate.error : "",
+        path:
+            typeof candidate.path === "string" ? candidate.path : fallbackPath,
+    };
+}
+
+async function doRefresh(): Promise<void> {
+    const response = await fetch("/api/auth/refresh", {
+        method: "POST",
+        credentials: "same-origin",
+    });
+
+    if (!response.ok) {
+        throw new Error("Refresh failed");
+    }
+
+    const data: AuthSessionResponse = await response.json();
+
+    useAuthStore.getState().setSession(data);
 }
 
 export async function apiFetch<T>(
     path: string,
     options: RequestInit & { _isRetry?: boolean } = {},
 ): Promise<T> {
-    const isBff = path.startsWith("/api/auth");
-    const url = isBff ? path : `${API_BASE}${path}`;
+    if (!isApiPath(path)) {
+        throw new Error("apiFetch only supports local BFF /api/* paths");
+    }
 
-    const { accessToken } = useAuthStore.getState();
     const { _isRetry, headers: extraHeaders, ...restOptions } = options;
 
-    const headers: Record<string, string> = {
-        ...(restOptions.body !== undefined
-            ? { "Content-Type": "application/json" }
-            : {}),
-        ...(!isBff && accessToken
-            ? { Authorization: `Bearer ${accessToken}` }
-            : {}),
-        ...(extraHeaders as Record<string, string> | undefined),
-    };
+    const headers = new Headers(extraHeaders);
 
-    const res = await fetch(url, { ...restOptions, headers });
+    if (restOptions.body !== undefined && !headers.has("Content-Type")) {
+        headers.set("Content-Type", "application/json");
+    }
 
-    if (res.status === 401 && !_isRetry && !isBff) {
+    const response = await fetch(path, {
+        ...restOptions,
+        headers,
+        credentials: restOptions.credentials ?? "same-origin",
+    });
+
+    if (response.status === 401 && !_isRetry && !isAuthPath(path)) {
         try {
             if (!refreshPromise) {
                 refreshPromise = doRefresh().finally(() => {
                     refreshPromise = null;
                 });
             }
-            const newToken = await refreshPromise;
-            return apiFetch(path, {
+
+            await refreshPromise;
+
+            return apiFetch<T>(path, {
                 ...options,
                 _isRetry: true,
-                headers: {
-                    ...(extraHeaders as Record<string, string> | undefined),
-                    Authorization: `Bearer ${newToken}`,
-                },
             });
         } catch {
             useAuthStore.getState().clear();
-            if (typeof window !== "undefined") window.location.href = "/login";
+
+            if (typeof window !== "undefined") {
+                window.location.href = "/login";
+            }
+
             throw new ApiError(
                 401,
                 "Session expired",
@@ -75,16 +120,20 @@ export async function apiFetch<T>(
         }
     }
 
-    if (res.status === 204) return undefined as T;
+    if (response.status === 204) {
+        return undefined as T;
+    }
 
-    const body = await res.json().catch(() => null);
+    const body: unknown = await response.json().catch(() => null);
 
-    if (!res.ok) {
+    if (!response.ok) {
+        const errorBody = toErrorBody(body, path);
+
         throw new ApiError(
-            body?.statusCode ?? res.status,
-            body?.message ?? "Unknown error",
-            body?.error ?? "",
-            body?.path ?? path,
+            errorBody.statusCode,
+            errorBody.message,
+            errorBody.error,
+            errorBody.path,
         );
     }
 

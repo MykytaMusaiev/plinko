@@ -70,8 +70,6 @@ export interface RevealedSeedResponse {
     nonce: number;
 }
 
-// BFF auth responses (enriched by Route Handlers)
-export interface BffAuthResponse {
-    accessToken: string;
+export interface AuthSessionResponse {
     user: UserMe;
 }

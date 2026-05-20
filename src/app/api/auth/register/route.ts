@@ -1,47 +1,61 @@
 import { NextRequest, NextResponse } from "next/server";
-import type { UserMe } from "@/shared/types/api.types";
-
-const API = process.env.API_BASE ?? "https://plinko-be-stanish.fly.dev";
-
-const REFRESH_COOKIE = {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "strict" as const,
-    path: "/",
-    maxAge: 60 * 60 * 24 * 30,
-};
+import type { AuthSessionResponse, UserMe } from "@/shared/types/api.types";
+import { isAuthTokens, setAuthCookies } from "@/shared/server/authCookies";
+import { API_BASE } from "@/shared/server/env";
 
 async function fetchUserMe(accessToken: string): Promise<UserMe> {
-    const res = await fetch(`${API}/api/v1/users/me`, {
+    const response = await fetch(`${API_BASE}/api/v1/users/me`, {
         headers: { Authorization: `Bearer ${accessToken}` },
     });
-    if (!res.ok) throw new Error("Failed to fetch user");
-    return res.json();
+
+    if (!response.ok) {
+        throw new Error("Failed to fetch user");
+    }
+
+    return response.json() as Promise<UserMe>;
 }
 
 export async function POST(req: NextRequest) {
     try {
-        const body = await req.json();
+        const body: unknown = await req.json();
 
-        const beRes = await fetch(`${API}/api/v1/auth/register`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(body),
-        });
+        const backendResponse = await fetch(
+            `${API_BASE}/api/v1/auth/register`,
+            {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(body),
+            },
+        );
 
-        if (!beRes.ok) {
-            const err = await beRes.json();
-            return NextResponse.json(err, { status: beRes.status });
+        if (!backendResponse.ok) {
+            const errorBody: unknown = await backendResponse
+                .json()
+                .catch(() => null);
+
+            return NextResponse.json(errorBody, {
+                status: backendResponse.status,
+            });
         }
 
-        const { accessToken, refreshToken } = await beRes.json();
-        const user = await fetchUserMe(accessToken);
+        const tokens: unknown = await backendResponse.json();
+
+        if (!isAuthTokens(tokens)) {
+            return NextResponse.json(
+                { message: "Invalid auth response" },
+                { status: 502 },
+            );
+        }
+
+        const user = await fetchUserMe(tokens.accessToken);
 
         const response = NextResponse.json(
-            { accessToken, user },
+            { user } satisfies AuthSessionResponse,
             { status: 201 },
         );
-        response.cookies.set("refreshToken", refreshToken, REFRESH_COOKIE);
+
+        setAuthCookies(response, tokens);
+
         return response;
     } catch {
         return NextResponse.json(
