@@ -82,19 +82,54 @@ function readAllFiles(dir) {
   return results;
 }
 
+function isUsableArtifact(file) {
+  const normalized = file.replace(/\\/g, "/");
+  if (normalized.endsWith("/.gitkeep")) return false;
+  if (normalized === ".ai/tasks/TEMPLATE.md") return false;
+  if (normalized.startsWith(".ai/tasks/archived/")) return false;
+  return normalized.startsWith(".ai/tasks/active/") || file === process.env.TASK_ARTIFACT_PATH;
+}
+
+function hasFilledRationale(text) {
+  const lines = text.split(/\r?\n/);
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const inline = line.match(/docs[- ]not[- ]needed|documentation[- ]not[- ]needed/i);
+    const heading = line.match(/^#+\s*Docs not needed rationale\s*$/i);
+
+    if (inline && !heading) {
+      const afterMarker = line
+        .replace(/.*(?:docs[- ]not[- ]needed|documentation[- ]not[- ]needed)\s*:?\s*/i, "")
+        .trim();
+      if (afterMarker.length > 0) return true;
+    }
+
+    if (heading || /docs[- ]not[- ]needed rationale\s*:?/i.test(line)) {
+      for (let j = i + 1; j < lines.length; j++) {
+        const candidate = lines[j].trim();
+        if (/^#+\s+/.test(candidate)) break;
+        if (candidate && !/^[-_*]+$/.test(candidate)) return true;
+      }
+    }
+  }
+
+  return false;
+}
+
 function hasDocsNotNeededRationale() {
   const explicit = process.env.TASK_ARTIFACT_PATH;
   const candidates = [];
 
-  if (explicit && fileExists(explicit)) {
+  if (explicit && fileExists(explicit) && isUsableArtifact(explicit)) {
     candidates.push(explicit);
   }
 
-  candidates.push(...readAllFiles(".ai/tasks"));
+  candidates.push(...readAllFiles(".ai/tasks/active").filter(isUsableArtifact));
 
   return candidates.some((file) => {
     const text = fs.readFileSync(file, "utf8");
-    return /docs[- ]not[- ]needed|documentation[- ]not[- ]needed/i.test(text);
+    return hasFilledRationale(text);
   });
 }
 

@@ -33,12 +33,11 @@ Repository documentation freshness:
 - Use `docs/doc-mapping.json` to identify docs related to changed source areas.
 - When a mapped source area changes, update the related docs or explicitly
   record why docs were not needed.
-- A task artifact may contain the docs-not-needed rationale when the approved
-  task flow provides an artifact location.
+- A docs-not-needed rationale may be recorded in an active task artifact under
+  `.ai/tasks/active/` or in a file explicitly provided to the freshness script.
 - Documentation review must check semantic correctness, not only file presence.
-- Validation scripts are expected to catch missing mapped documentation updates
-  once those scripts exist. Until then, reviewers should apply the mapping
-  manually.
+- `scripts/check-docs-freshness.sh` checks mapped documentation updates. Review
+  still verifies semantic correctness.
 
 Planned:
 

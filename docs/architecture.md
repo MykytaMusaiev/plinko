@@ -51,5 +51,6 @@ Architecture rules:
 Planned:
 
 - Deeper module documentation may be added as modules become complete.
-- Repo-local skills and automation are future phases, not current
-  infrastructure.
+- Package-level validation aliases are not wired yet; run repository scripts
+  directly when needed.
+- Task artifact creation remains manual.

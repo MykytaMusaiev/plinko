@@ -35,8 +35,9 @@ Available commands:
 - `pnpm start`
 
 Do not claim that a script exists unless it is present in `package.json`.
-Validation scripts are not created yet. Until Phase 7 adds them, use available
-package scripts only.
+Repository validation scripts exist under `scripts/`, but `package.json` does
+not currently define a validation alias. Use available package scripts and
+direct script paths.
 
 # Documentation Lookup Rules
 
@@ -110,16 +111,15 @@ Keep changes scoped to the active task.
 
 # AI Development Flow
 
-Future task-scoped artifacts belong under `.ai/tasks/` according to the approved
-staged execution plan. Do not create `tasks/` as a top-level task artifact
-directory.
+Task-scoped artifacts belong under `.ai/tasks/`. Do not create `tasks/` as a
+top-level task artifact directory.
 
 When working on a task:
 
 - Keep artifacts task-scoped.
 - Avoid one global `session.md` as the coordination mechanism.
 - Record assumptions, files touched, verification run, and handoff notes in the
-  task artifact location required by the approved plan.
+  task artifact.
 - For multi-agent or worktree work, keep ownership boundaries explicit and avoid
   overlapping edits unless coordination is part of the task.
 

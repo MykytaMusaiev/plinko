@@ -16,6 +16,9 @@ Required for code changes:
 - Follow existing feature-oriented structure.
 - Run `pnpm lint` when applicable.
 - Run `pnpm build` when the change may affect build or runtime behavior.
+- Run `scripts/check-api-boundary.sh` when API/auth boundary behavior may be
+  affected.
+- Run `scripts/check-docs-freshness.sh` when mapped source areas change.
 - Report skipped validation with a reason.
 
 Required final response:
@@ -34,5 +37,5 @@ Conventional Commit format:
 
 Partial:
 
-- Dedicated validation scripts are not created yet. Until Phase 7, use existing
-  package scripts only.
+- Repository validation scripts exist under `scripts/`.
+- `package.json` does not currently define a single validation alias.
