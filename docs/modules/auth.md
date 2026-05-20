@@ -9,13 +9,21 @@ Related files: src/app/api/auth, src/features/auth/api/auth.api.ts, src/features
 Implemented:
 
 - Browser auth API calls use local BFF routes through `authApi`.
-- Login and register submit credentials to local BFF routes.
-- Successful login/register responses set httpOnly auth cookies in the BFF.
-- Refresh uses the httpOnly `refreshToken` cookie and updates both auth cookies.
-- Logout calls the backend best-effort when tokens exist, then clears local
-  cookies.
-- Session hydration calls `/api/auth/session` and stores the returned user in
-  Zustand.
+- `POST /api/auth/login` forwards credentials to backend
+  `/api/v1/auth/login`, fetches `/api/v1/users/me` with the returned access
+  token, sets auth cookies, and returns `{ user }`.
+- `POST /api/auth/register` forwards credentials to backend
+  `/api/v1/auth/register`, fetches `/api/v1/users/me` with the returned access
+  token, sets auth cookies, and returns `{ user }` with status 201.
+- `POST /api/auth/refresh` reads the httpOnly `refreshToken` cookie, calls
+  backend `/api/v1/auth/refresh`, fetches `/api/v1/users/me`, updates auth
+  cookies, and returns `{ user }`.
+- `POST /api/auth/logout` calls backend `/api/v1/auth/logout` best-effort when
+  both cookies exist, then clears local auth cookies and returns 204.
+- `GET /api/auth/session` uses `backendFetch` to call backend
+  `/api/v1/users/me` with auth and returns `{ user }`.
+- Session hydration calls local `/api/auth/session` and stores the returned
+  user in Zustand.
 
 Security rules:
 
@@ -23,6 +31,8 @@ Security rules:
 - Zustand stores session/UI state only. It must never store auth tokens.
 - Browser code must not read, write, log, or forward auth tokens.
 - Browser code must not construct backend bearer token headers.
+- Browser auth code must use local `/api/auth/*` BFF routes, not backend
+  `/api/v1/auth/*` routes.
 
 Partial:
 

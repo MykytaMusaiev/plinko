@@ -8,6 +8,10 @@ Related files: src/app/api, src/shared/lib/apiFetch.ts, src/shared/server
 
 The frontend uses a Next.js BFF boundary.
 
+Request flow:
+
+Browser runtime -> local Next.js `/api/*` route -> backend `/api/v1/*`.
+
 Implemented browser boundary:
 
 - Browser runtime code calls local `/api/*` routes only.
@@ -21,8 +25,17 @@ Implemented server boundary:
 
 - Backend `/api/v1/*` paths are used in server-side BFF code.
 - `API_BASE` is read from server-only env code in `src/shared/server/env.ts`.
-- `backendFetch` reads auth cookies from `NextRequest`, refreshes tokens when
-  needed, and applies backend responses to local BFF responses.
+- `backendFetch` builds backend requests using `API_BASE`.
+- `backendFetch` reads `accessToken` and `refreshToken` from `NextRequest`
+  cookies when auth is required.
+- `backendFetch` adds backend bearer authorization only from server-side cookie
+  state.
+- `backendFetch` refreshes tokens when auth is required and the access token is
+  missing or the backend returns 401 with a refresh token available.
+- `backendFetch` returns status, parsed JSON or null, refreshed tokens, and a
+  clear-auth-cookie flag for route handlers to apply.
+- BFF route handlers are responsible for returning local `NextResponse`
+  objects and applying cookie updates.
 
 Current local BFF routes:
 

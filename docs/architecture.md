@@ -10,13 +10,34 @@ This repository is a Next.js App Router frontend for a Plinko game.
 
 Implemented:
 
-- App Router pages live under `src/app`.
-- Feature code lives under `src/features`.
-- Shared UI, browser helpers, server helpers, and shared types live under
-  `src/shared`.
-- Root providers configure TanStack Query, auth hydration, and Sonner toasts.
-- Protected page access is checked in `src/proxy.ts` by looking for the
-  `refreshToken` cookie. Full session validation happens through BFF routes.
+- App Router files live under `src/app`.
+- Route groups split auth and game pages:
+  - `src/app/(auth)/login`
+  - `src/app/(auth)/register`
+  - `src/app/(game)/game`
+- Next.js BFF route handlers live under `src/app/api`.
+- Root providers in `src/app/providers.tsx` configure TanStack Query, auth
+  hydration, and Sonner toasts.
+- `src/proxy.ts` allows public auth/API paths and redirects protected page
+  requests to `/login` when the `refreshToken` cookie is absent.
+
+Feature folders:
+
+- `src/features/auth` contains auth API wrappers, Zustand session state, and
+  login/register UI.
+- `src/features/game` contains manual game controls, board rendering, game
+  state, config loading, and bet placement integration.
+- `src/features/history` exists but current files are empty.
+- `src/features/fair` exists but current files are empty.
+
+Shared layers:
+
+- `src/shared/lib` contains browser-safe reusable utilities such as API fetch,
+  bigint formatting/parsing, HMAC helpers, and multiplier colors.
+- `src/shared/types` contains shared API TypeScript shapes.
+- `src/shared/ui` contains generic UI primitives.
+- `src/shared/server` contains server-only environment, backend fetch, and auth
+  cookie helpers.
 
 Architecture rules:
 
