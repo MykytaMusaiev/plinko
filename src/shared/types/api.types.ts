@@ -34,9 +34,7 @@ export interface BetSeedRef {
     nonce: number;
 }
 
-// Verified against real POST /api/v1/bets response
-// TODO(types): Re-verify full shape after GET /api/v1/bets is tested — fields may expand
-export interface BetResponse {
+interface BetFields {
     betId: string;
     amount: string;
     rows: number;
@@ -46,12 +44,20 @@ export interface BetResponse {
     multiplier: string;
     payout: string;
     balanceAfter: string;
-    createdAt?: string; // present in list responses, absent in POST response
+}
+
+// Verified against real POST /api/v1/bets response
+export interface BetResponse extends BetFields {
     seed: BetSeedRef;
 }
 
+// Verified against real authenticated GET /api/bets response
+export interface BetListItemResponse extends BetFields {
+    createdAt: string;
+}
+
 export interface BetListResponse {
-    items: BetResponse[];
+    items: BetListItemResponse[];
     nextCursor: string | null;
 }
 

@@ -24,7 +24,17 @@ Known types:
 - `CreateBetDto` includes `amount`, `rows`, and `risk`.
 - `BetResponse` is marked in code as verified against real POST
   `/api/v1/bets`.
-- `BetListResponse` contains `items` and `nextCursor`.
+- `BetListResponse` is verified against a real authenticated `GET /api/bets`
+  response and contains `items` and `nextCursor`.
+- `BetListResponse.items` contains list items with `betId`, `amount`, `rows`,
+  `risk`, `path`, `bucketIndex`, `multiplier`, `payout`, `balanceAfter`, and
+  `createdAt`.
+- Observed list values confirm `amount`, `multiplier`, `payout`, and
+  `balanceAfter` are strings; `rows` and `bucketIndex` are numbers; `createdAt`
+  is a string timestamp.
+- The observed list response did not include `seed` on items. `seed` remains
+  part of the POST `BetResponse`.
+- `nextCursor` is `string | null`; the verified sample observed `null`.
 - `BetResponse.balanceAfter` is consumed by the game board to update displayed
   user balance after animation completes.
 - `BetResponse.path` is consumed by `PegGrid` to animate the ball path.
@@ -36,6 +46,7 @@ Partial:
 
 Unverified:
 
-- Real GET `/api/v1/bets` response shape remains unverified unless documented
-  from a live/backend response. Current `BetListResponse` is a TypeScript
-  assumption.
+- Other possible `risk` values in list responses beyond the existing shared
+  `Risk` type were not established by the verified GET sample.
+- Non-null `nextCursor` content and cursor semantics remain unverified.
+- Additional fields not present in the verified sample remain unverified.

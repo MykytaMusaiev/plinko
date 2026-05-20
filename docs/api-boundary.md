@@ -51,4 +51,5 @@ Current local BFF routes:
 Unverified:
 
 - Backend error body consistency across all `/api/v1/*` endpoints.
-- Full GET `/api/v1/bets` item shape beyond current TypeScript assumptions.
+- Non-null GET `/api/v1/bets` cursor values and pagination semantics.
+- Backend fields not present in the verified GET `/api/bets` sample.
