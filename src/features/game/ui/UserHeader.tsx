@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { History } from 'lucide-react';
+import { Logout } from '@/features/auth/ui/Logout';
 import { useAuthStore } from '@/features/auth/model/auth.store';
 import { formatCredits } from '@/shared/lib/bigint';
 import { clsx } from 'clsx';
@@ -25,7 +26,7 @@ export function UserHeader() {
   }, [balance]);
 
   return (
-    <header className="flex items-center justify-between px-5 py-3 border-b border-white/5">
+    <header className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 border-b border-white/5 sm:px-5">
       <span className="text-white font-semibold tracking-wide text-sm">Plinko</span>
 
       <div className="flex items-center gap-2">
@@ -43,14 +44,17 @@ export function UserHeader() {
         </span>
       </div>
 
-      <Link
-        href="/history"
-        className="flex items-center gap-1.5 text-xs text-neutral-400 hover:text-white transition-colors"
-        aria-label="Bet history"
-      >
-        <History size={14} />
-        History
-      </Link>
+      <div className="flex items-center gap-3">
+        <Link
+          href="/history"
+          className="flex items-center gap-1.5 text-xs text-neutral-400 hover:text-white transition-colors"
+          aria-label="Bet history"
+        >
+          <History size={14} />
+          History
+        </Link>
+        <Logout />
+      </div>
     </header>
   );
 }

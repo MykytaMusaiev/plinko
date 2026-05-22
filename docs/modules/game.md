@@ -1,7 +1,7 @@
 Status: Implemented
 Owner: Frontend
 Source of truth: src/features/game, src/app/api/game/config/route.ts
-Last verified: 2026-05-20
+Last verified: 2026-05-22
 Related files: src/features/game, src/app/(game)/game/page.tsx, src/app/api/game/config/route.ts
 
 # Game Module
@@ -27,7 +27,8 @@ Implemented:
   `lastResult`, and stops playing state.
 - `MultiplierBar` reads `winningBucketIndex` from game state to show the
   winning bucket highlight.
-- `UserHeader` links the History control to the authenticated `/history` page.
+- `UserHeader` links the History control to the authenticated `/history` page
+  and renders the auth-owned Logout control.
 
 Current constraints:
 
