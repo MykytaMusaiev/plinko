@@ -16,11 +16,20 @@ Use this flow for Codex-driven work in this repository.
 5. For library/framework/API questions, use `ctx7` documentation lookup.
 6. For Next.js code changes, read the relevant local docs under
    `node_modules/next/dist/docs/`.
-7. Make the smallest scoped change that satisfies the task.
-8. Record commands, validation, docs freshness, risks, and handoff notes in the
-   task artifact when one is active.
-9. Validate with available package scripts when applicable.
-10. Return the required output contract.
+7. Before implementation, identify the owning feature and expected file
+   placement for component code, helpers, constants, config, types, adapters,
+   view models, API wrappers, and model logic.
+8. Make the smallest scoped change that satisfies the task, keeping clean
+   feature-oriented structure as the code is generated.
+9. Update related docs or record a docs-not-needed rationale.
+10. Run the semantic code-quality review gate when the change touches code, UI,
+    refactors, or architecture-sensitive areas.
+11. Validate with available package scripts when applicable.
+12. Run pre-commit readiness before any manual commit.
+13. Commit only when the user asks for it.
+14. Archive the task artifact when the task is complete and archival is
+    applicable.
+15. Return the required output contract.
 
 Task artifacts:
 
@@ -29,6 +38,9 @@ Task artifacts:
 - Keep active work under `.ai/tasks/active/`.
 - Move completed task artifacts to `.ai/tasks/archived/`.
 - Do not use one global mutable `session.md` as the source of truth.
+- Record approval, ownership decisions when non-obvious, docs rationale,
+  review-gate evidence, validation, pre-commit readiness, risks, and handoff
+  notes when an artifact is active.
 - Put durable architecture decisions in `docs/decisions/`.
 - Put durable module knowledge in `docs/modules/`.
 

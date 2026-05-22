@@ -9,11 +9,35 @@ Related files: AGENTS.md, package.json
 A task is done when the requested scope is implemented and the final response
 clearly reports what changed.
 
+Required lifecycle:
+
+- Request and scope are understood.
+- Audit or plan is completed when needed.
+- User approval is recorded before implementation when the task requires it.
+- Ownership and file placement are considered before feature or UI code is
+  written.
+- Implementation stays clean as it is generated, not only after review.
+- Related docs are updated or a docs-not-needed rationale is recorded.
+- Semantic review gate passes when required.
+- Mechanical validation passes or skipped checks are explained.
+- Pre-commit readiness is confirmed before any manual commit.
+- Task artifacts are archived when applicable.
+
 Required for code changes:
 
 - Stay within the requested scope.
 - Preserve the BFF boundary and auth token rules.
 - Follow existing feature-oriented structure.
+- Keep React component files focused on rendering, composition, hook usage, and
+  event wiring.
+- Keep non-trivial helpers, formatters, filters, mappers, constants, option
+  lists, DTO adapters, and view-model builders outside component files in the
+  owning feature when justified by the task.
+- Use `src/shared` only for generic cross-feature or platform-level reuse, not
+  feature-specific convenience.
+- Run the semantic review gate for UI, code, refactor, or
+  architecture-sensitive changes. Review confirms implementation quality; it
+  should not be the first safeguard against obvious structure problems.
 - Run `pnpm lint` when applicable.
 - Run `pnpm build` when the change may affect build or runtime behavior.
 - Run `scripts/check-api-boundary.sh` when API/auth boundary behavior may be

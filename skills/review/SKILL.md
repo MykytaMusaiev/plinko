@@ -40,8 +40,32 @@ Find correctness and process risks without modifying files.
 3. Inspect diffs and relevant current source.
 4. Review correctness, architecture, BFF boundary, auth/security, typing, state
    ownership, docs freshness, and regression risk.
-5. Verify validation evidence or note missing validation.
-6. Return Pass or Needs changes with concrete findings.
+5. Run the semantic code-quality checklist when the change touches code, UI,
+   refactors, or architecture-sensitive areas.
+6. Verify validation evidence or note missing validation.
+7. Return Pass or Needs changes with concrete findings.
+
+## Semantic code-quality checklist
+
+Review should confirm that implementation generated clean structure from the
+start, but it may block completion when structure debt remains.
+
+- UI/component quality: components have clear responsibility and stay focused on
+  rendering, composition, hook usage, and event wiring.
+- Feature ownership: feature-specific helpers, utils, lib, constants, config,
+  types, adapters, view models, model logic, and API wrappers stay in the owning
+  feature.
+- Shared misuse: `src/shared` additions or moves are generic cross-feature or
+  platform-level reuse, not convenience for feature-specific code.
+- Repeated UI and JSX readability: repeated fragments are extracted when they
+  obscure intent, and JSX remains readable.
+- Inline logic: non-trivial helpers, constants, types, formatters, filters,
+  mappers, option lists, DTO adapters, and view-model builders are not left in
+  component files without a local reason.
+- State and data shaping: derived state is not duplicated unnecessarily, and
+  view-model or adapter placement matches feature boundaries.
+- Refactor readiness: scoped refactors identify ownership, coupling, docs
+  impact, validation, and review evidence before completion.
 
 ## Output format
 
@@ -58,4 +82,6 @@ Find correctness and process risks without modifying files.
 - Reporting style preferences as blockers.
 - Missing browser-side backend calls or token handling.
 - Treating docs file presence as semantic correctness.
+- Treating review as the first place where obvious structure problems should be
+  discovered.
 - Ignoring unverified backend response shapes.

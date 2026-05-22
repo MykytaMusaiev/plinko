@@ -39,6 +39,18 @@ Repository validation scripts exist under `scripts/`, but `package.json` does
 not currently define a validation alias. Use available package scripts and
 direct script paths.
 
+# Project Map
+
+- `docs/architecture.md` summarizes the implemented app, feature, and shared
+  layers.
+- `docs/api-boundary.md` and `docs/decisions/` record accepted API/auth and
+  state ownership decisions.
+- `docs/modules/` documents feature behavior and module-specific status.
+- `docs/workflow/` documents task flow, documentation freshness, and definition
+  of done.
+- `skills/` contains repo-local task gates; `scripts/` contains mechanical
+  validation checks.
+
 # Documentation Lookup Rules
 
 Use the `ctx7` CLI to fetch current documentation whenever a task asks about a
@@ -106,6 +118,20 @@ Preserve the current feature-oriented layout:
 - `src/features` for feature modules.
 - `src/shared` for shared UI, types, browser utilities, and server-only helpers.
 
+Before writing feature or UI code, identify the owning feature and expected file
+ownership. Keep feature-specific helpers, utils, lib, constants, config, types,
+adapters, view models, model logic, and API wrappers inside the owning feature
+when they are not generic reuse.
+
+Keep React component files focused on rendering, composition, hook usage, and
+event wiring. During implementation, extract non-trivial helpers, formatters,
+filters, mappers, constants, option lists, DTO adapters, and view-model builders
+out of component files into the owning feature when the task and existing
+conventions justify it. Avoid creating folders for trivial one-off code.
+
+Move code to `src/shared` only for generic cross-feature or platform-level
+reuse. Do not move feature-specific code to `src/shared` for convenience.
+
 Do not introduce broad app refactors unless the user explicitly asks for them.
 Keep changes scoped to the active task.
 
@@ -120,6 +146,11 @@ When working on a task:
 - Avoid one global `session.md` as the coordination mechanism.
 - Record assumptions, files touched, verification run, and handoff notes in the
   task artifact.
+- For implementation work, plan ownership and file placement before editing,
+  implement clean feature-oriented structure as you go, update docs or record a
+  docs-not-needed rationale, pass the semantic review gate when required, run
+  validation, complete pre-commit readiness, and archive the task artifact when
+  applicable.
 - For multi-agent or worktree work, keep ownership boundaries explicit and avoid
   overlapping edits unless coordination is part of the task.
 
