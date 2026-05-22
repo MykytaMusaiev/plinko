@@ -112,8 +112,8 @@ Ready for pre-commit flow after review. Validation passed, but changes have not 
 
 ## Artifact status / archival status
 
-Active. Do not archive yet.
+Archived. Completed and accepted for manual commit readiness.
 
 ## Handoff / next step
 
-Run the repository review/pre-commit flow, then archive this artifact when the task is accepted.
+Ready for manual commit.
