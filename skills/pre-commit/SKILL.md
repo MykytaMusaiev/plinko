@@ -25,6 +25,8 @@ automatically.
 
 - `git status --short`.
 - Relevant `git diff`.
+- Active task artifact under `.ai/tasks/active/`.
+- Approved editable files and non-goals from the active task artifact.
 - `package.json` scripts.
 - Presence or absence of validation scripts.
 - Review/code-quality gate evidence when code, UI, refactor, or
@@ -36,27 +38,35 @@ automatically.
 - Do not modify files unless the user explicitly asks for fixes.
 - Do not invent validation scripts.
 - Do not replace semantic review; confirm review-gate evidence only.
+- Do not treat an archived, missing, or stale task artifact as ready.
+- Do not approve unexpected changed files without explicit scope approval.
 - Report skipped checks with reasons.
 
 ## Workflow
 
 1. Inspect `git status --short`.
 2. Inspect relevant diffs.
-3. Confirm review/code-quality gate evidence is present or explicitly not
+3. Locate the active task artifact for the implementation.
+4. Confirm the artifact is current, not archived, and names the approved
+   editable files, non-goals, docs rationale, validation, risks, and handoff.
+5. Compare changed files against the approved editable scope.
+6. Confirm review/code-quality gate evidence is present or explicitly not
    applicable.
-4. Run `pnpm lint` when applicable.
-5. Run validation scripts if present.
-6. Run `check-api-boundary.sh` if present.
-7. Run `check-docs-freshness.sh` if present.
-8. Report Ready only when required checks pass or are explicitly not
+7. Run `pnpm lint` when applicable.
+8. Run validation scripts if present.
+9. Run `check-api-boundary.sh` if present.
+10. Run `check-docs-freshness.sh` if present.
+11. Report Ready only when required checks pass or are explicitly not
    applicable.
-9. Report Blocked when validation fails, scope is unclear, review-gate evidence
+12. Report Blocked when validation fails, scope is unclear, the task artifact is
+   missing or stale, changed files exceed approved scope, review-gate evidence
    is missing, or required checks cannot run.
 
 ## Output format
 
 - Ready / Blocked
 - Files changed
+- Task artifact status
 - Commands run
 - Validation result
 - Skipped checks and reasons
@@ -69,5 +79,7 @@ automatically.
 - Running scripts that do not exist.
 - Ignoring unstaged or unrelated changes.
 - Performing semantic code review instead of checking for review evidence.
+- Skipping changed-files-vs-approved-scope comparison.
+- Accepting missing, stale, or archived task artifacts.
 - Treating skipped validation as passing.
 - Forgetting API-boundary and docs-freshness checks when scripts exist.
