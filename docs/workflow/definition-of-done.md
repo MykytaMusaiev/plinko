@@ -1,7 +1,7 @@
 Status: Partial
 Owner: Frontend
 Source of truth: AGENTS.md, package.json
-Last verified: 2026-05-20
+Last verified: 2026-05-22
 Related files: AGENTS.md, package.json
 
 # Definition Of Done
@@ -14,9 +14,13 @@ Required lifecycle:
 - Request and scope are understood.
 - Audit or plan is completed when needed.
 - User approval is recorded before implementation when the task requires it.
+- Implementation has an active task artifact with approved editable files,
+  context-only files, non-goals, assumptions, docs rationale, validation,
+  review-gate status, risks, and handoff notes when applicable.
 - Ownership and file placement are considered before feature or UI code is
   written.
 - Implementation stays clean as it is generated, not only after review.
+- Changed files stay within the approved editable scope.
 - Related docs are updated or a docs-not-needed rationale is recorded.
 - Semantic review gate passes when required.
 - Mechanical validation passes or skipped checks are explained.
@@ -26,6 +30,7 @@ Required lifecycle:
 Required for code changes:
 
 - Stay within the requested scope.
+- Stop before expanding beyond the approved audit or plan scope.
 - Preserve the BFF boundary and auth token rules.
 - Follow existing feature-oriented structure.
 - Keep React component files focused on rendering, composition, hook usage, and
@@ -43,6 +48,8 @@ Required for code changes:
 - Run `scripts/check-api-boundary.sh` when API/auth boundary behavior may be
   affected.
 - Run `scripts/check-docs-freshness.sh` when mapped source areas change.
+- Pre-commit readiness blocks missing or stale task artifacts, unexpected
+  changed files, and missing review-gate evidence when the gate applies.
 - Report skipped validation with a reason.
 
 Required final response:

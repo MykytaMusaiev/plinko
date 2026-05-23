@@ -1,7 +1,7 @@
 Status: Implemented
 Owner: Frontend
 Source of truth: src/app/api/auth, src/features/auth, src/shared/server
-Last verified: 2026-05-20
+Last verified: 2026-05-22
 Related files: src/app/api/auth, src/features/auth/api/auth.api.ts, src/features/auth/model/auth.store.ts
 
 # Auth Module
@@ -24,6 +24,8 @@ Implemented:
   `/api/v1/users/me` with auth and returns `{ user }`.
 - Session hydration calls local `/api/auth/session` and stores the returned
   user in Zustand.
+- The logout UI calls the local logout wrapper, clears frontend session state
+  and cached query data after success, then redirects to `/login`.
 
 Security rules:
 

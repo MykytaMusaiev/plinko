@@ -140,6 +140,12 @@ Keep changes scoped to the active task.
 Task-scoped artifacts belong under `.ai/tasks/`. Do not create `tasks/` as a
 top-level task artifact directory.
 
+For repository execution tasks, prefer local repository skills under
+`skills/<name>/SKILL.md` over generic, external, or inferred workflows. When a
+prompt names a local skill path, treat that skill as the workflow source of
+truth; if it is missing, unclear, or not applicable, stop and explain why before
+falling back to another workflow.
+
 When working on a task:
 
 - Keep artifacts task-scoped.
@@ -147,10 +153,11 @@ When working on a task:
 - Record assumptions, files touched, verification run, and handoff notes in the
   task artifact.
 - For implementation work, plan ownership and file placement before editing,
-  implement clean feature-oriented structure as you go, update docs or record a
-  docs-not-needed rationale, pass the semantic review gate when required, run
-  validation, complete pre-commit readiness, and archive the task artifact when
-  applicable.
+  create or update an active task artifact before edits, track approved editable
+  files separately from context-only files, implement clean feature-oriented
+  structure as you go, update docs or record a docs-not-needed rationale, pass
+  the semantic review gate when required, run validation, complete pre-commit
+  readiness, and archive the task artifact only when applicable.
 - For multi-agent or worktree work, keep ownership boundaries explicit and avoid
   overlapping edits unless coordination is part of the task.
 

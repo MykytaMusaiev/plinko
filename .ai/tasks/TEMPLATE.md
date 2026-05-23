@@ -18,10 +18,22 @@
 ## User approval
 
 
+## Audit / plan source
+
+
+## Approved editable files
+
+
+## Context-only files inspected
+
+
 ## Affected source files
 
 
 ## Affected docs
+
+
+## Stop conditions / scope expansion notes
 
 
 ## Architecture-sensitive changes

@@ -1,6 +1,6 @@
 ---
 name: review
-description: Review Plinko repository changes without editing files. Use when Codex is asked to assess correctness, architecture, BFF boundary compliance, typing, state ownership, docs freshness, validation, or regression risk.
+description: Review completed Plinko repository changes without editing files. Use when Codex is asked to assess completed code, diffs, selected files, correctness, architecture, BFF boundary compliance, typing, state ownership, docs freshness, validation, or regression risk.
 ---
 
 # Review
@@ -11,13 +11,16 @@ Find correctness and process risks without modifying files.
 
 ## When to use
 
-- The user asks to review, audit, check, or gate a phase.
+- The user asks to review completed changes, diffs, selected files, or an
+  existing implementation.
 - The task is read-only.
 - A change needs architecture, BFF, docs, or validation assessment.
 
 ## When not to use
 
 - The user asks to implement changes.
+- The user asks for pre-implementation discovery or scope planning; use
+  `skills/audit/SKILL.md`.
 - The task requires staging, committing, or generating artifacts.
 
 ## Required context
@@ -84,4 +87,5 @@ start, but it may block completion when structure debt remains.
 - Treating docs file presence as semantic correctness.
 - Treating review as the first place where obvious structure problems should be
   discovered.
+- Treating review as pre-implementation audit.
 - Ignoring unverified backend response shapes.
