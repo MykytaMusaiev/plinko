@@ -4,66 +4,63 @@ import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { clsx } from 'clsx';
 import type { BetResponse } from '@/shared/types/api.types';
+import type { BoardGeometry, Waypoint } from '../lib/boardGeometry';
 
-const PEG_GAP = 36;
-const ROW_H = 40;
-const PEG_R = 4;
-const BALL_R = 9;
-const PAD_TOP = 20;
 const STEP_MS = 62;
 
-interface Waypoint {
-  x: number;
-  y: number;
-  hitRow?: number;
-  hitPeg?: number;
-}
-
-function buildWaypoints(path: string, centerX: number): Waypoint[] {
+function buildWaypoints(path: string, geometry: BoardGeometry): Waypoint[] {
   const rows = path.length;
   const wps: Waypoint[] = [];
 
-  wps.push({ x: centerX, y: PAD_TOP - BALL_R - 6 });
+  wps.push({
+    x: geometry.centerX,
+    y: geometry.padTop - geometry.ballRadius - 6,
+  });
 
   let rCount = 0;
   for (let r = 0; r < rows; r++) {
-    const pegX = centerX + (rCount - (r + 1) / 2) * PEG_GAP;
-    const pegY = PAD_TOP + r * ROW_H;
-    wps.push({ x: pegX, y: pegY, hitRow: r, hitPeg: rCount });
+    const peg = geometry.pegRows[r]?.[rCount];
+    if (!peg) break;
+
+    wps.push({ x: peg.x, y: peg.y, hitRow: r, hitPeg: rCount });
 
     if (path[r] === 'R') rCount++;
 
-    const nextX =
+    const nextPoint =
       r + 1 < rows
-        ? centerX + (rCount - (r + 2) / 2) * PEG_GAP
-        : centerX + (rCount - rows / 2) * PEG_GAP;
+        ? geometry.pegRows[r + 1]?.[rCount]
+        : geometry.landingColumns[rCount];
 
-    wps.push({ x: (pegX + nextX) / 2, y: pegY + ROW_H / 2 });
+    if (nextPoint) {
+      wps.push({
+        x: (peg.x + nextPoint.x) / 2,
+        y: peg.y + geometry.rowGap / 2,
+      });
+    }
   }
 
-  wps.push({
-    x: centerX + (rCount - path.length / 2) * PEG_GAP,
-    y: PAD_TOP + path.length * ROW_H + 20,
-  });
+  const landingColumn = geometry.landingColumns[rCount];
+  if (landingColumn) {
+    wps.push({ x: landingColumn.x, y: geometry.landingY });
+  }
 
   return wps;
 }
 
 interface PegGridProps {
-  rows: number;
+  geometry: BoardGeometry;
   lastResult: BetResponse | null;
   onAnimationComplete: (result: BetResponse) => void;
 }
 
-export function PegGrid({ rows, lastResult, onAnimationComplete }: PegGridProps) {
-  const containerWidth = (rows + 3) * PEG_GAP;
-  const containerHeight = PAD_TOP + rows * ROW_H + 60;
-  const centerX = containerWidth / 2;
-
+export function PegGrid({ geometry, lastResult, onAnimationComplete }: PegGridProps) {
   const onAnimationCompleteRef = useRef(onAnimationComplete);
 
   const [ballVisible, setBallVisible] = useState(false);
-  const [ballPos, setBallPos] = useState({ x: centerX, y: PAD_TOP - BALL_R - 6 });
+  const [ballPos, setBallPos] = useState({
+    x: geometry.centerX,
+    y: geometry.padTop - geometry.ballRadius - 6,
+  });
   const [hitPeg, setHitPeg] = useState<{ row: number; peg: number } | null>(null);
 
   useEffect(() => {
@@ -73,7 +70,7 @@ export function PegGrid({ rows, lastResult, onAnimationComplete }: PegGridProps)
   useEffect(() => {
     if (!lastResult) return;
 
-    const wps = buildWaypoints(lastResult.path, centerX);
+    const wps = buildWaypoints(lastResult.path, geometry);
     const timeoutIds: number[] = [];
     let step = 0;
     let cancelled = false;
@@ -123,32 +120,19 @@ export function PegGrid({ rows, lastResult, onAnimationComplete }: PegGridProps)
       cancelled = true;
       timeoutIds.forEach((timeoutId) => window.clearTimeout(timeoutId));
     };
-  }, [lastResult, centerX]);
-
-  const pegs: Array<{ r: number; p: number; x: number; y: number }> = [];
-
-  for (let r = 0; r < rows; r++) {
-    for (let p = 0; p <= r + 1; p++) {
-      pegs.push({
-        r,
-        p,
-        x: centerX + (p - (r + 1) / 2) * PEG_GAP,
-        y: PAD_TOP + r * ROW_H,
-      });
-    }
-  }
+  }, [lastResult, geometry]);
 
   return (
     <div
-      style={{ width: containerWidth, height: containerHeight }}
-      className="relative mx-auto select-none"
+      style={{ width: geometry.width, height: geometry.pegGridHeight }}
+      className="relative mx-auto shrink-0 select-none"
     >
-      {pegs.map(({ r, p, x, y }) => {
-        const isHit = hitPeg?.row === r && hitPeg?.peg === p;
+      {geometry.pegs.map(({ row, peg, x, y }) => {
+        const isHit = hitPeg?.row === row && hitPeg?.peg === peg;
 
         return (
           <div
-            key={`${r}-${p}`}
+            key={`${row}-${peg}`}
             className={clsx(
               'absolute rounded-full transition-all',
               isHit
@@ -156,10 +140,10 @@ export function PegGrid({ rows, lastResult, onAnimationComplete }: PegGridProps)
                 : 'bg-neutral-500/80',
             )}
             style={{
-              width: PEG_R * 2,
-              height: PEG_R * 2,
-              left: x - PEG_R,
-              top: y - PEG_R,
+              width: geometry.pegRadius * 2,
+              height: geometry.pegRadius * 2,
+              left: x - geometry.pegRadius,
+              top: y - geometry.pegRadius,
               transitionDuration: isHit ? '30ms' : '150ms',
             }}
           />
@@ -173,8 +157,8 @@ export function PegGrid({ rows, lastResult, onAnimationComplete }: PegGridProps)
             initial={{ opacity: 0, scale: 0.3 }}
             exit={{ opacity: 0, scale: 0.2, transition: { duration: 0.15 } }}
             animate={{
-              x: ballPos.x - BALL_R,
-              y: ballPos.y - BALL_R,
+              x: ballPos.x - geometry.ballRadius,
+              y: ballPos.y - geometry.ballRadius,
               opacity: 1,
               scale: hitPeg ? [1, 1.25, 0.9, 1] : 1,
             }}
@@ -188,8 +172,8 @@ export function PegGrid({ rows, lastResult, onAnimationComplete }: PegGridProps)
               position: 'absolute',
               top: 0,
               left: 0,
-              width: BALL_R * 2,
-              height: BALL_R * 2,
+              width: geometry.ballRadius * 2,
+              height: geometry.ballRadius * 2,
               borderRadius: '50%',
               background:
                 'radial-gradient(circle at 35% 30%, #ffffff, #4ade80 60%, #16a34a)',
