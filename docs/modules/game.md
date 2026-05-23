@@ -14,14 +14,24 @@ Implemented:
   winning bucket index, bet amount, risk, and selected rows.
 - Game config is loaded from local `/api/game/config` with TanStack Query.
 - `/api/game/config` proxies to backend `/api/v1/game/config` without auth.
-- `BetControls` builds a manual bet from current amount, rows, and risk, then
-  calls `usePlaceBet`.
+- `useBetControlsModel` owns shared betting control behavior for manual bet
+  submission, amount editing, clamping, risk selection, row selection, mode UI,
+  pending/playing disabled state, and balance display.
+- `BetControls` is the desktop control shell. It uses the shared betting control
+  model and preserves the desktop left-rail visual layout.
+- `MobileBetHud` is the mobile control shell. It uses the same shared betting
+  control model while composing a mobile-first HUD with a centered Bet CTA,
+  compact amount strip, compact risk selector, disabled future Auto mode, and
+  compact rows/lines selection near the board.
+- Manual bet submission is built from the shared model's current amount, rows,
+  and risk, then calls `usePlaceBet`.
 - `usePlaceBet` calls `betsApi.place`, which posts to local `/api/bets`.
 - On successful bet placement, the result is added to recent results, stored as
   `lastResult`, and `isPlaying` is set to true.
 - `GameLayout` structures the authenticated game screen into responsive top,
-  board, and controls zones. On mobile, the existing `BetControls` panel is
-  placed below the board without changing betting behavior.
+  board, and controls zones. On desktop, it renders the existing `BetControls`
+  left rail. On mobile, it keeps the board first and renders `MobileBetHud`
+  below the board without duplicating betting state or submit behavior.
 - `GameBoard` owns the visual board composition and renders `PegGrid` with the
   attached `MultiplierBar` bucket row directly below it.
 - `GameBoard`, `PegGrid`, and `MultiplierBar` share the feature-local board
