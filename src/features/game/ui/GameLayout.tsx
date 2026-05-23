@@ -2,9 +2,13 @@
 
 import { CheckCircle } from 'lucide-react';
 import { useGameConfig } from '../model/useGameConfig';
+import { useBetControlsModel } from '../model/useBetControlsModel';
 import { BetControls } from './BetControls';
 import { GameBoard } from './GameBoard';
+import { MobileBetHud } from './MobileBetHud';
+import { MobileRowsSelector } from './MobileRowsSelector';
 import { UserHeader } from './UserHeader';
+import type { GameConfig } from '@/shared/types/api.types';
 
 export function GameLayout() {
   const { data: config, isLoading, isError } = useGameConfig();
@@ -25,27 +29,38 @@ export function GameLayout() {
     );
   }
 
+  return <GameLayoutContent config={config} />;
+}
+
+function GameLayoutContent({ config }: { config: GameConfig }) {
+  const betControls = useBetControlsModel({ config });
+
   return (
-    <div className="min-h-screen bg-neutral-950 text-white">
+    <div className="flex h-dvh min-h-screen flex-col overflow-x-hidden bg-neutral-950 text-white lg:h-auto">
       <UserHeader />
 
-      <main className="grid min-h-[calc(100vh-57px)] grid-cols-1 lg:h-[calc(100vh-57px)] lg:grid-cols-[13.75rem_minmax(0,1fr)] lg:overflow-hidden">
+      <main className="grid min-h-0 flex-1 grid-cols-1 overflow-hidden lg:h-[calc(100vh-57px)] lg:flex-none lg:grid-cols-[13.75rem_minmax(0,1fr)]">
         <section
           aria-label="Bet controls"
-          className="order-2 w-full lg:order-1 lg:w-auto [&>aside]:h-auto [&>aside]:w-full [&>aside]:border-r-0 [&>aside]:border-t [&>aside]:border-white/5 lg:[&>aside]:h-full lg:[&>aside]:w-55 lg:[&>aside]:border-r lg:[&>aside]:border-t-0"
+          className="hidden lg:order-1 lg:block lg:w-auto lg:[&>aside]:h-full lg:[&>aside]:w-55 lg:[&>aside]:border-r lg:[&>aside]:border-t-0"
         >
-          <BetControls config={config} />
+          <BetControls model={betControls} />
         </section>
 
         <section
           aria-label="Game board"
-          className="order-1 flex min-w-0 flex-col overflow-visible lg:order-2 lg:min-h-0"
+          className="order-1 flex min-h-0 min-w-0 flex-col overflow-hidden lg:order-2"
         >
-          <div className="flex min-h-0 w-full flex-1 items-start justify-center px-3 py-4 sm:px-6 sm:py-6 lg:items-center">
+          <div className="relative flex min-h-0 w-full min-w-0 flex-1 items-start justify-center overflow-hidden px-2 py-2 sm:px-6 sm:py-6 lg:items-center">
             <GameBoard config={config} />
+            <MobileRowsSelector model={betControls} />
           </div>
 
-          <div className="shrink-0 px-4 py-3">
+          <div className="shrink-0 lg:hidden">
+            <MobileBetHud model={betControls} />
+          </div>
+
+          <div className="hidden shrink-0 px-4 py-3 lg:block">
             <div className="flex justify-end">
               <button className="flex items-center gap-1.5 text-xs text-emerald-500/70 transition-colors hover:text-emerald-400">
                 <CheckCircle size={13} />
