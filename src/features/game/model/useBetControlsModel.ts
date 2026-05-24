@@ -5,11 +5,12 @@ import { toast } from 'sonner';
 import { useAuthStore } from '@/features/auth/model/auth.store';
 import { formatCredits, parseCredits, MIN_BET, MAX_BET } from '@/shared/lib/bigint';
 import type { GameConfig, Risk } from '@/shared/types/api.types';
-import { useGameStore, type GameMode } from './game.store';
+import { useGameStore, type GameMode, type PlaybackMode } from './game.store';
 import { usePlaceBet } from './usePlaceBet';
 
 export const RISKS: Risk[] = ['LOW', 'MEDIUM', 'HIGH'];
 export const MODES: GameMode[] = ['manual', 'auto'];
+export const PLAYBACK_MODES: PlaybackMode[] = ['normal', 'fast'];
 
 export interface BetControlsModel {
   betAmount: bigint;
@@ -18,6 +19,7 @@ export interface BetControlsModel {
   risk: Risk;
   selectedRows: number;
   mode: GameMode;
+  playbackMode: PlaybackMode;
   rowValues: number[];
   rowMin: number;
   rowMax: number;
@@ -32,6 +34,7 @@ export interface BetControlsModel {
   setRisk: (risk: Risk) => void;
   setSelectedRows: (rows: number) => void;
   setMode: (mode: GameMode) => void;
+  setPlaybackMode: (mode: PlaybackMode) => void;
   handleBet: () => void;
 }
 
@@ -47,11 +50,13 @@ export function useBetControlsModel({ config }: UseBetControlsModelInput): BetCo
     risk,
     selectedRows,
     mode,
+    playbackMode,
     isPlaying,
     setBetAmount,
     setRisk,
     setSelectedRows,
     setMode,
+    setPlaybackMode,
   } = useGameStore();
 
   const [editingAmount, setEditingAmount] = useState<string | null>(null);
@@ -127,6 +132,7 @@ export function useBetControlsModel({ config }: UseBetControlsModelInput): BetCo
     risk,
     selectedRows,
     mode,
+    playbackMode,
     rowValues,
     rowMin,
     rowMax,
@@ -141,6 +147,7 @@ export function useBetControlsModel({ config }: UseBetControlsModelInput): BetCo
     setRisk,
     setSelectedRows,
     setMode,
+    setPlaybackMode,
     handleBet,
   };
 }

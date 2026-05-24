@@ -3,7 +3,12 @@
 import * as Slider from '@radix-ui/react-slider';
 import { clsx } from 'clsx';
 import { DollarSign } from 'lucide-react';
-import { MODES, RISKS, type BetControlsModel } from '../model/useBetControlsModel';
+import {
+  MODES,
+  PLAYBACK_MODES,
+  RISKS,
+  type BetControlsModel,
+} from '../model/useBetControlsModel';
 
 interface BetControlsProps {
   model: BetControlsModel;
@@ -30,6 +35,28 @@ export function BetControls({ model }: BetControlsProps) {
             {m.charAt(0).toUpperCase() + m.slice(1)}
           </button>
         ))}
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <span className="text-xs text-neutral-400 font-medium">Playback</span>
+        <div className="flex rounded-lg overflow-hidden bg-neutral-900 p-0.5 gap-0.5">
+          {PLAYBACK_MODES.map((m) => (
+            <button
+              key={m}
+              type="button"
+              onClick={() => model.setPlaybackMode(m)}
+              disabled={model.isDisabled}
+              className={clsx(
+                'flex-1 py-1.5 text-xs font-medium rounded-md capitalize transition-colors disabled:cursor-not-allowed disabled:opacity-40',
+                model.playbackMode === m
+                  ? 'bg-emerald-500/20 text-emerald-400'
+                  : 'text-neutral-500 hover:text-neutral-300',
+              )}
+            >
+              {m}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Bet amount */}

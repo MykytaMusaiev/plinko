@@ -2,7 +2,12 @@
 
 import { clsx } from 'clsx';
 import { DollarSign } from 'lucide-react';
-import { MODES, RISKS, type BetControlsModel } from '../model/useBetControlsModel';
+import {
+  MODES,
+  PLAYBACK_MODES,
+  RISKS,
+  type BetControlsModel,
+} from '../model/useBetControlsModel';
 
 interface MobileBetHudProps {
   model: BetControlsModel;
@@ -80,6 +85,25 @@ export function MobileBetHud({ model }: MobileBetHudProps) {
             ))}
           </div>
         </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-1 rounded-md bg-neutral-950/75 p-1">
+        {PLAYBACK_MODES.map((m) => (
+          <button
+            key={m}
+            type="button"
+            onClick={() => model.setPlaybackMode(m)}
+            disabled={model.isDisabled}
+            className={clsx(
+              'h-7 rounded text-[10px] font-semibold capitalize transition-colors disabled:cursor-not-allowed disabled:opacity-45',
+              model.playbackMode === m
+                ? 'bg-emerald-400 text-neutral-950'
+                : 'text-neutral-400 hover:bg-white/5 hover:text-neutral-200',
+            )}
+          >
+            {m}
+          </button>
+        ))}
       </div>
 
       <div className="grid grid-cols-[2.45rem_2.45rem_minmax(0,1fr)_2.45rem_2.45rem] overflow-hidden rounded-md border border-white/10 bg-neutral-950">

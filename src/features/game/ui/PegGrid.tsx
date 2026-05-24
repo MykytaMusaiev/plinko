@@ -4,44 +4,46 @@ import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { clsx } from 'clsx';
 import type { BetResponse } from '@/shared/types/api.types';
-import type { BoardGeometry, Waypoint } from '../lib/boardGeometry';
+import {
+  getBucketLandingTarget,
+  getLaneContactTarget,
+  type BoardGeometry,
+  type Waypoint,
+} from '../lib/boardGeometry';
 
 const STEP_MS = 62;
+const BALL_SETTLE_MS = 140;
 
-function buildWaypoints(path: string, geometry: BoardGeometry): Waypoint[] {
+function buildWaypoints(result: BetResponse, geometry: BoardGeometry): Waypoint[] {
+  const { path } = result;
   const rows = path.length;
   const wps: Waypoint[] = [];
+  const resultLandingTarget = getBucketLandingTarget(geometry, result.bucketIndex);
 
   wps.push({
     x: geometry.centerX,
     y: geometry.padTop - geometry.ballRadius - 6,
   });
 
-  let rCount = 0;
+  let laneIndex = 0;
   for (let r = 0; r < rows; r++) {
-    const peg = geometry.pegRows[r]?.[rCount];
-    if (!peg) break;
+    const lane = geometry.laneRows[r]?.[laneIndex];
+    if (!lane) break;
 
-    wps.push({ x: peg.x, y: peg.y, hitRow: r, hitPeg: rCount });
+    wps.push({ x: lane.x, y: lane.y });
 
-    if (path[r] === 'R') rCount++;
+    const direction = path[r];
+    const contactTarget = getLaneContactTarget(geometry, r, laneIndex, direction);
 
-    const nextPoint =
-      r + 1 < rows
-        ? geometry.pegRows[r + 1]?.[rCount]
-        : geometry.landingColumns[rCount];
-
-    if (nextPoint) {
-      wps.push({
-        x: (peg.x + nextPoint.x) / 2,
-        y: peg.y + geometry.rowGap / 2,
-      });
+    if (contactTarget) {
+      wps.push(contactTarget);
     }
+
+    if (direction === 'R') laneIndex++;
   }
 
-  const landingColumn = geometry.landingColumns[rCount];
-  if (landingColumn) {
-    wps.push({ x: landingColumn.x, y: geometry.landingY });
+  if (resultLandingTarget) {
+    wps.push({ x: resultLandingTarget.x, y: resultLandingTarget.y });
   }
 
   return wps;
@@ -70,7 +72,7 @@ export function PegGrid({ geometry, lastResult, onAnimationComplete }: PegGridPr
   useEffect(() => {
     if (!lastResult) return;
 
-    const wps = buildWaypoints(lastResult.path, geometry);
+    const wps = buildWaypoints(lastResult, geometry);
     const timeoutIds: number[] = [];
     let step = 0;
     let cancelled = false;
@@ -92,7 +94,7 @@ export function PegGrid({ geometry, lastResult, onAnimationComplete }: PegGridPr
         schedule(() => {
           setBallVisible(false);
           onAnimationCompleteRef.current(lastResult);
-        }, 900);
+        }, BALL_SETTLE_MS);
 
         return;
       }

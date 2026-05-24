@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { useGameStore } from '../model/game.store';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { REVEAL_MS, useGameStore } from '../model/game.store';
 import { useAuthStore } from '@/features/auth/model/auth.store';
 import { createBoardGeometry } from '../lib/boardGeometry';
 import { MultiplierBar } from './MultiplierBar';
@@ -15,8 +15,7 @@ interface GameBoardProps {
 const MOBILE_BOARD_MAX_WIDTH = 640;
 
 export function GameBoard({ config }: GameBoardProps) {
-  const { selectedRows, lastResult, setPlaying, setLastResult, setWinningBucketIndex } =
-    useGameStore();
+  const { selectedRows, playbackMode, lastResult, completeRound, clearReveal } = useGameStore();
   const { user, setUser } = useAuthStore();
   const frameRef = useRef<HTMLDivElement>(null);
   const [availableSize, setAvailableSize] = useState({ width: 0, height: 0 });
@@ -56,25 +55,32 @@ export function GameBoard({ config }: GameBoardProps) {
     [availableSize.height, availableSize.width, selectedRows],
   );
 
-  const handleAnimationComplete = (result: BetResponse) => {
-    // Update balance from server response
-    if (user) setUser({ ...user, balance: result.balanceAfter });
-    // Highlight winning bucket
-    setWinningBucketIndex(result.bucketIndex);
-    setPlaying(false);
-    setLastResult(null);
+  const completePlayback = useCallback(
+    (result: BetResponse) => {
+      const didComplete = completeRound(result);
 
-    // Clear highlight after 2.5s
-    setTimeout(() => setWinningBucketIndex(null), 2500);
-  };
+      if (!didComplete) return;
+
+      if (user) setUser({ ...user, balance: result.balanceAfter });
+
+      window.setTimeout(() => clearReveal(result.betId), REVEAL_MS);
+    },
+    [clearReveal, completeRound, setUser, user],
+  );
+
+  useEffect(() => {
+    if (playbackMode !== 'fast' || !lastResult) return;
+
+    completePlayback(lastResult);
+  }, [completePlayback, lastResult, playbackMode]);
 
   return (
     <div ref={frameRef} className="w-full min-w-0">
       <div className="mx-auto flex flex-col items-center" style={{ width: geometry.width }}>
         <PegGrid
           geometry={geometry}
-          lastResult={lastResult}
-          onAnimationComplete={handleAnimationComplete}
+          lastResult={playbackMode === 'normal' ? lastResult : null}
+          onAnimationComplete={completePlayback}
         />
         <MultiplierBar config={config} geometry={geometry} />
       </div>
