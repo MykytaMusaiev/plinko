@@ -10,13 +10,14 @@ Implemented:
 
 - Manual game flow is implemented in `src/features/game`.
 - Game state is stored in Zustand through `useGameStore`.
-- Current state includes mode, playing state, recent results, last result,
-  winning bucket index, bet amount, risk, and selected rows.
+- Current state includes game mode, playback mode, playing state, recent
+  results, last result, winning bucket index, revealed bet identity, bet
+  amount, risk, and selected rows.
 - Game config is loaded from local `/api/game/config` with TanStack Query.
 - `/api/game/config` proxies to backend `/api/v1/game/config` without auth.
 - `useBetControlsModel` owns shared betting control behavior for manual bet
-  submission, amount editing, clamping, risk selection, row selection, mode UI,
-  pending/playing disabled state, and balance display.
+  submission, amount editing, clamping, risk selection, row selection, game mode
+  UI, playback mode UI, pending/playing disabled state, and balance display.
 - `BetControls` is the desktop control shell. It uses the shared betting control
   model and preserves the desktop left-rail visual layout.
 - `MobileBetHud` is the mobile control shell. It uses the same shared betting
@@ -26,8 +27,14 @@ Implemented:
 - Manual bet submission is built from the shared model's current amount, rows,
   and risk, then calls `usePlaceBet`.
 - `usePlaceBet` calls `betsApi.place`, which posts to local `/api/bets`.
-- On successful bet placement, the result is added to recent results, stored as
-  `lastResult`, and `isPlaying` is set to true.
+- On successful bet placement, the shared round lifecycle starts a round: the
+  result is added to recent results, stored as `lastResult`, stale reveal state
+  is cleared, and `isPlaying` is set to true.
+- Playback mode is separate from manual/auto game mode. Normal playback runs the
+  board animation, while fast playback skips the full ball animation.
+- Normal and fast playback share the same completion contract. Completion
+  accepts the active result once, updates round readiness, reveals the winning
+  bucket, clears `lastResult`, and allows the next action.
 - `GameLayout` structures the authenticated game screen into responsive top,
   board, and controls zones. On desktop, it renders the existing `BetControls`
   left rail. On mobile, it keeps the board first and renders `MobileBetHud`
@@ -36,18 +43,25 @@ Implemented:
   attached `MultiplierBar` bucket row directly below it.
 - `GameBoard`, `PegGrid`, and `MultiplierBar` share the feature-local board
   geometry model in `src/features/game/lib/boardGeometry.ts`. The model derives
-  peg positions, landing columns, bucket centers, bucket dimensions, and
-  vertical bucket spacing from selected row count and available board size.
+  visual boundary peg positions, lane/path slot positions, landing columns,
+  bucket centers, bucket dimensions, and vertical bucket spacing from selected
+  row count and available board size.
 - Board geometry scales progressively by selected row count: lower row counts
   can use larger peg spacing when the container has room, while 16 rows keep the
   dense baseline spacing. The same geometry model is used on desktop and
   mobile; surrounding layout constraints provide the available board size.
-- `GameBoard` passes `lastResult` to `PegGrid`.
-- `PegGrid` builds animation waypoints from backend-provided
-  `BetResponse.path`.
-- When animation completes, `GameBoard` updates the displayed user balance from
-  backend-provided `balanceAfter`, highlights `bucketIndex`, clears
-  `lastResult`, and stops playing state.
+- `GameBoard` passes `lastResult` to `PegGrid` only for normal playback.
+- `PegGrid` builds normal playback waypoints from backend-provided
+  `BetResponse.path` through geometry-owned lane/path slots. Each path step
+  passes near the relevant visual boundary peg so the motion reads as a peg
+  deflection, then uses the feature-local board geometry landing target for
+  backend-provided `bucketIndex` as the explicit final bucket-drop waypoint.
+- When playback completes, `GameBoard` updates the displayed user balance from
+  backend-provided `balanceAfter` after the shared completion contract accepts
+  the result.
+- Winning bucket highlight is visual feedback only. Highlight cleanup uses the
+  completed result's `betId` so an older cleanup timer cannot clear a newer
+  result reveal, and round readiness does not wait for highlight cleanup.
 - `MultiplierBar` reads `winningBucketIndex` from game state to show the
   winning bucket highlight and renders bucket labels as the attached board
   bucket row.
@@ -60,6 +74,8 @@ Current constraints:
 - Game config shape is defined in `src/shared/types/api.types.ts`.
 - Auto mode is visible as disabled UI/state only; no completed automated
   betting flow is documented here.
+- Fast playback does not change bet submission, backend API calls, or Auto mode
+  behavior.
 
 Unverified:
 

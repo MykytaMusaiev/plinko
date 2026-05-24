@@ -26,6 +26,9 @@ const IDEAL_BUCKET_VERTICAL_GAP = 20;
 const MIN_BUCKET_VERTICAL_GAP = 12;
 const MOBILE_HEIGHT_FILL_RATIO = 0.78;
 const MOBILE_MAX_ROW_GAP = 54;
+const LANE_CONTACT_CLEARANCE = 3;
+const LANE_CONTACT_HORIZONTAL_RATIO = 0.92;
+const LANE_CONTACT_MAX_LANE_PROGRESS = 0.82;
 
 interface BoardGeometryInput {
   rows: number;
@@ -47,6 +50,11 @@ export interface Waypoint extends BoardPoint {
 export interface PegPosition extends BoardPoint {
   row: number;
   peg: number;
+}
+
+export interface LanePosition extends BoardPoint {
+  row: number;
+  lane: number;
 }
 
 export interface LandingColumn extends BoardPoint {
@@ -79,8 +87,59 @@ export interface BoardGeometry {
   landingY: number;
   pegs: PegPosition[];
   pegRows: PegPosition[][];
+  laneRows: LanePosition[][];
   landingColumns: LandingColumn[];
   buckets: BucketGeometry[];
+}
+
+export function getBucketLandingTarget(
+  geometry: BoardGeometry,
+  bucketIndex: number,
+): LandingColumn | undefined {
+  return geometry.landingColumns[bucketIndex];
+}
+
+export function getLaneContactPeg(
+  geometry: BoardGeometry,
+  row: number,
+  laneIndex: number,
+  direction: string,
+): PegPosition | undefined {
+  const pegIndex = direction === 'R' ? laneIndex + 1 : laneIndex;
+
+  return geometry.pegRows[row]?.[pegIndex];
+}
+
+export function getLaneContactTarget(
+  geometry: BoardGeometry,
+  row: number,
+  laneIndex: number,
+  direction: string,
+): Waypoint | undefined {
+  const lane = geometry.laneRows[row]?.[laneIndex];
+  const peg = getLaneContactPeg(geometry, row, laneIndex, direction);
+
+  if (!lane || !peg) {
+    return undefined;
+  }
+
+  const laneToPegX = Math.abs(peg.x - lane.x);
+  const contactDistance = geometry.ballRadius + geometry.pegRadius + LANE_CONTACT_CLEARANCE;
+  const horizontalOffset = Math.min(
+    contactDistance * LANE_CONTACT_HORIZONTAL_RATIO,
+    laneToPegX * LANE_CONTACT_MAX_LANE_PROGRESS,
+  );
+  const verticalOffset = Math.sqrt(
+    Math.max(contactDistance ** 2 - horizontalOffset ** 2, 0),
+  );
+  const contactSide = direction === 'R' ? -1 : 1;
+
+  return {
+    x: peg.x + horizontalOffset * contactSide,
+    y: peg.y - verticalOffset,
+    hitRow: peg.row,
+    hitPeg: peg.peg,
+  };
 }
 
 function clamp(value: number, min: number, max: number): number {
@@ -227,6 +286,7 @@ export function createBoardGeometry({
   const width = (rows + 3) * pegGap;
   const centerX = width / 2;
   const pegRows: PegPosition[][] = [];
+  const laneRows: LanePosition[][] = [];
   const pegs: PegPosition[] = [];
 
   for (let row = 0; row < rows; row++) {
@@ -245,6 +305,19 @@ export function createBoardGeometry({
     }
 
     pegRows.push(rowPegs);
+
+    const rowLanes: LanePosition[] = [];
+
+    for (let lane = 0; lane <= row; lane++) {
+      rowLanes.push({
+        row,
+        lane,
+        x: centerX + (lane - row / 2) * pegGap,
+        y: padTop + row * rowGap,
+      });
+    }
+
+    laneRows.push(rowLanes);
   }
 
   const finalPegY = padTop + (rows - 1) * rowGap;
@@ -285,6 +358,7 @@ export function createBoardGeometry({
     landingY,
     pegs,
     pegRows,
+    laneRows,
     landingColumns,
     buckets,
   };

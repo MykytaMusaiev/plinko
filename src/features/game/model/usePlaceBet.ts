@@ -8,16 +8,12 @@ interface UsePlaceBetOptions {
 }
 
 export function usePlaceBet({ onError }: UsePlaceBetOptions = {}) {
-    const { setPlaying, setLastResult, addResult, setWinningBucketIndex } =
-        useGameStore();
+    const { setPlaying, startRound } = useGameStore();
 
     return useMutation<BetResponse, Error, CreateBetDto>({
         mutationFn: betsApi.place,
         onSuccess: (result) => {
-            setWinningBucketIndex(null); // clear previous highlight
-            addResult(result);
-            setLastResult(result);
-            setPlaying(true);
+            startRound(result);
         },
         onError: (err) => {
             setPlaying(false);
