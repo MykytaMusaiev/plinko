@@ -12,6 +12,8 @@ interface GameBoardProps {
   config: GameConfig;
 }
 
+const MOBILE_BOARD_MAX_WIDTH = 640;
+
 export function GameBoard({ config }: GameBoardProps) {
   const { selectedRows, lastResult, setPlaying, setLastResult, setWinningBucketIndex } =
     useGameStore();
@@ -46,6 +48,10 @@ export function GameBoard({ config }: GameBoardProps) {
         rows: selectedRows,
         availableWidth: availableSize.width,
         availableHeight: availableSize.height,
+        layout:
+          availableSize.width > 0 && availableSize.width < MOBILE_BOARD_MAX_WIDTH
+            ? 'mobile'
+            : 'default',
       }),
     [availableSize.height, availableSize.width, selectedRows],
   );

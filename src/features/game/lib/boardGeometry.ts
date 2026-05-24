@@ -24,11 +24,14 @@ const MIN_BUCKET_GAP = 3;
 
 const IDEAL_BUCKET_VERTICAL_GAP = 20;
 const MIN_BUCKET_VERTICAL_GAP = 12;
+const MOBILE_HEIGHT_FILL_RATIO = 0.78;
+const MOBILE_MAX_ROW_GAP = 54;
 
 interface BoardGeometryInput {
   rows: number;
   availableWidth?: number;
   availableHeight?: number;
+  layout?: 'default' | 'mobile';
 }
 
 export interface BoardPoint {
@@ -121,6 +124,41 @@ function getTotalHeight(rows: number, pegGap: number): number {
   return padTop + (rows - 1) * rowGap + pegRadius + bucketVerticalGap + bucketHeight;
 }
 
+function getTotalHeightWithRowGap(
+  rows: number,
+  rowGap: number,
+  metrics: ReturnType<typeof getScaledMetrics>,
+): number {
+  const { pegRadius, padTop, bucketHeight, bucketVerticalGap } = metrics;
+
+  return padTop + (rows - 1) * rowGap + pegRadius + bucketVerticalGap + bucketHeight;
+}
+
+function fitMobileRowGapToAvailableHeight(
+  rows: number,
+  rowGap: number,
+  metrics: ReturnType<typeof getScaledMetrics>,
+  availableHeight?: number,
+): number {
+  if (!availableHeight || availableHeight <= 0 || rows <= 1) {
+    return rowGap;
+  }
+
+  const targetHeight = availableHeight * MOBILE_HEIGHT_FILL_RATIO;
+  if (getTotalHeightWithRowGap(rows, rowGap, metrics) >= targetHeight) {
+    return rowGap;
+  }
+
+  const availableForRows =
+    targetHeight -
+    metrics.padTop -
+    metrics.pegRadius -
+    metrics.bucketVerticalGap -
+    metrics.bucketHeight;
+
+  return clamp(availableForRows / (rows - 1), rowGap, MOBILE_MAX_ROW_GAP);
+}
+
 function fitPegGapToAvailableSize(
   rows: number,
   maxPegGap: number,
@@ -155,6 +193,7 @@ export function createBoardGeometry({
   rows,
   availableWidth,
   availableHeight,
+  layout = 'default',
 }: BoardGeometryInput): BoardGeometry {
   const maxPegGap = getMaxPegGap(rows);
   const pegGap = fitPegGapToAvailableSize(
@@ -163,6 +202,7 @@ export function createBoardGeometry({
     availableWidth,
     availableHeight,
   );
+  const scaledMetrics = getScaledMetrics(pegGap);
   const {
     rowGap,
     pegRadius,
@@ -171,7 +211,18 @@ export function createBoardGeometry({
     bucketHeight,
     bucketGap,
     bucketVerticalGap,
-  } = getScaledMetrics(pegGap);
+  } = {
+    ...scaledMetrics,
+    rowGap:
+      layout === 'mobile'
+        ? fitMobileRowGapToAvailableHeight(
+            rows,
+            scaledMetrics.rowGap,
+            scaledMetrics,
+            availableHeight,
+          )
+        : scaledMetrics.rowGap,
+  };
 
   const width = (rows + 3) * pegGap;
   const centerX = width / 2;

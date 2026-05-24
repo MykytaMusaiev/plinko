@@ -9,12 +9,16 @@ interface MobileRowsSelectorProps {
 
 export function MobileRowsSelector({ model }: MobileRowsSelectorProps) {
   return (
-    <div className="pointer-events-none absolute right-0 top-1 z-10 lg:hidden sm:right-3 sm:top-4">
-      <div className="pointer-events-auto flex w-[4.25rem] flex-col items-center gap-1 rounded-md border border-white/10 bg-neutral-950/65 p-1 shadow-lg backdrop-blur">
+    <div className="pointer-events-none absolute right-1 top-[42%] z-10 -translate-y-1/2 lg:hidden sm:right-4">
+      <div className="pointer-events-auto flex w-9 flex-col items-center gap-1 border-l border-white/10 bg-neutral-950/35 py-2 pl-1 pr-0.5 shadow-[12px_0_28px_rgba(0,0,0,0.28)] backdrop-blur-sm">
         <span className="text-[8px] font-bold uppercase leading-none text-neutral-500">
           Lines
         </span>
-        <div className="grid grid-cols-3 gap-0.5">
+        <div className="relative flex flex-col items-center gap-1 py-1">
+          <span
+            aria-hidden
+            className="absolute bottom-2 top-2 w-px rounded-full bg-white/10"
+          />
           {model.rowValues.map((rows) => (
             <button
               key={rows}
@@ -22,10 +26,10 @@ export function MobileRowsSelector({ model }: MobileRowsSelectorProps) {
               onClick={() => model.setSelectedRows(rows)}
               disabled={model.isDisabled}
               className={clsx(
-                'flex h-[1.125rem] w-5 items-center justify-center rounded text-[9px] font-bold leading-none transition-colors',
+                'relative flex h-5 w-7 items-center justify-center rounded-full text-[9px] font-bold leading-none transition-colors',
                 model.selectedRows === rows
-                  ? 'bg-emerald-400 text-neutral-950 shadow-[0_0_10px_rgba(52,211,153,0.28)]'
-                  : 'text-neutral-400 hover:bg-white/10 hover:text-white',
+                  ? 'bg-emerald-400 text-neutral-950 shadow-[0_0_12px_rgba(52,211,153,0.35)]'
+                  : 'bg-neutral-950/70 text-neutral-400 ring-1 ring-white/10 hover:bg-white/10 hover:text-white',
                 'disabled:cursor-not-allowed disabled:opacity-45',
               )}
               aria-pressed={model.selectedRows === rows}

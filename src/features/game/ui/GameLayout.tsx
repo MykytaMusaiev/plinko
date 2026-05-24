@@ -51,7 +51,7 @@ function GameLayoutContent({ config }: { config: GameConfig }) {
           aria-label="Game board"
           className="order-1 flex min-h-0 min-w-0 flex-col overflow-hidden lg:order-2"
         >
-          <div className="relative flex min-h-0 w-full min-w-0 flex-1 items-start justify-center overflow-hidden px-2 py-2 sm:px-6 sm:py-6 lg:items-center">
+          <div className="relative flex min-h-0 w-full min-w-0 flex-1 items-center justify-center overflow-hidden px-1.5 pb-1 pt-2 sm:px-6 sm:py-5 lg:p-6">
             <GameBoard config={config} />
             <MobileRowsSelector model={betControls} />
           </div>
