@@ -14,6 +14,9 @@ Required lifecycle:
 - Request and scope are understood.
 - Audit or plan is completed when needed.
 - User approval is recorded before implementation when the task requires it.
+- Branch mode is recorded before implementation edits. Non-trivial
+  implementation defaults to PR-mode from the configured base branch
+  `feat/plinko`; local/no-PR mode is explicit and includes a rationale.
 - Implementation has an active task artifact with approved editable files,
   context-only files, non-goals, assumptions, docs rationale, validation,
   review-gate status, risks, and handoff notes when applicable.
@@ -24,7 +27,8 @@ Required lifecycle:
 - Related docs are updated or a docs-not-needed rationale is recorded.
 - Semantic review gate passes when required.
 - Mechanical validation passes or skipped checks are explained.
-- Pre-commit readiness is confirmed before any manual commit.
+- Pre-commit readiness mechanically confirms the branch invariant before any
+  manual commit.
 - Task artifacts are archived when applicable.
 
 Required for code changes:
@@ -48,8 +52,11 @@ Required for code changes:
 - Run `scripts/check-api-boundary.sh` when API/auth boundary behavior may be
   affected.
 - Run `scripts/check-docs-freshness.sh` when mapped source areas change.
-- Pre-commit readiness blocks missing or stale task artifacts, unexpected
-  changed files, and missing review-gate evidence when the gate applies.
+- Pre-commit readiness blocks missing or stale task artifacts, missing branch
+  mode, PR-mode work on the recorded base branch, PR-mode branch mismatches,
+  local/no-PR work without a rationale, unexpected changed files, and missing
+  review-gate evidence when the gate applies.
+- Post-commit PR lifecycle remains manual unless separately requested.
 - Report skipped validation with a reason.
 
 Required final response:

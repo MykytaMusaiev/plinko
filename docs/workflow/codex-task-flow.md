@@ -15,29 +15,39 @@ Use this flow for Codex-driven work in this repository.
    applicable.
 3. Use `skills/audit/SKILL.md` for pre-implementation discovery when ownership,
    related files, docs impact, or risks are not already clear.
-4. Create or update one task artifact for implementation work under
+4. Before implementation edits, choose branch mode:
+   - PR-mode is the default for non-trivial implementation tasks.
+   - Current Plinko task work uses `feat/plinko` as the default
+     base/integration branch unless the user specifies another base.
+   - PR-mode work starts from the base branch and moves to a dedicated task
+     branch before source, docs, or workflow edits.
+   - Local/no-PR mode must be explicit and must record a rationale.
+5. Create or update one task artifact for implementation work under
    `.ai/tasks/active/` before product, docs, or workflow edits.
-5. Record approved editable files separately from context-only files.
-6. Inspect relevant files before editing.
-7. Check current package scripts before claiming a command exists.
-8. For library/framework/API questions, use `ctx7` documentation lookup.
-9. For Next.js code changes, read the relevant local docs under
+6. Record approved editable files separately from context-only files.
+7. Inspect relevant files before editing.
+8. Check current package scripts before claiming a command exists.
+9. For library/framework/API questions, use `ctx7` documentation lookup.
+10. For Next.js code changes, read the relevant local docs under
    `node_modules/next/dist/docs/`.
-10. Before implementation, identify the owning feature and expected file
+11. Before implementation, identify the owning feature and expected file
    placement for component code, helpers, constants, config, types, adapters,
    view models, API wrappers, and model logic.
-11. Make the smallest scoped change that satisfies the task, keeping clean
+12. Make the smallest scoped change that satisfies the task, keeping clean
    feature-oriented structure as the code is generated.
-12. Stop before changing files or behavior outside the approved scope.
-13. Update related docs or record a docs-not-needed rationale.
-14. Use `skills/review/SKILL.md` for the semantic code-quality review gate when
+13. Stop before changing files or behavior outside the approved scope.
+14. Update related docs or record a docs-not-needed rationale.
+15. Use `skills/review/SKILL.md` for the semantic code-quality review gate when
     the change touches code, UI, refactors, or architecture-sensitive areas.
-15. Validate with available package scripts when applicable.
-16. Use `skills/pre-commit/SKILL.md` before any manual commit.
-17. Commit only when the user asks for it.
-18. Archive the task artifact when the task is complete and archival is
+16. Validate with available package scripts when applicable.
+17. Use `skills/pre-commit/SKILL.md` before any manual commit.
+18. Commit only when the user asks for it.
+19. Keep post-commit PR lifecycle manual; do not automate PR creation, merge,
+    branch deletion, staging, or committing unless the user asks for that
+    separate action.
+20. Archive the task artifact when the task is complete and archival is
     applicable.
-19. Return the required output contract.
+21. Return the required output contract.
 
 Task artifacts:
 
@@ -46,9 +56,11 @@ Task artifacts:
 - Keep active work under `.ai/tasks/active/`.
 - Move completed task artifacts to `.ai/tasks/archived/`.
 - Do not use one global mutable `session.md` as the source of truth.
-- Record approval, audit or plan source, approved editable files, context-only
-  files, ownership decisions when non-obvious, docs rationale, review-gate
-  evidence, validation, pre-commit readiness, risks, and handoff notes.
+- Record approval, audit or plan source, branch mode, base branch, task branch,
+  current branch at task start, branch-start status and evidence, local/no-PR
+  rationale when applicable, approved editable files, context-only files,
+  ownership decisions when non-obvious, docs rationale, review-gate evidence,
+  validation, pre-commit readiness, risks, and handoff notes.
 - Keep implementation artifacts active until validation and pre-commit readiness
   are recorded, unless the user explicitly asks otherwise.
 - Put durable architecture decisions in `docs/decisions/`.
@@ -66,3 +78,5 @@ Approval required before:
 Partial:
 
 - Task scaffolding scripts are not created yet.
+- Branch-start enforcement is skill-driven; no hooks, CI, or PR automation are
+  implemented.

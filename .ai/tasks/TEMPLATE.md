@@ -3,7 +3,31 @@
 ## Task ID
 
 
-## Branch/worktree
+## Branch mode
+
+
+## Base branch
+
+
+## Task branch
+
+
+## Current branch at task start
+
+
+## Branch-start status
+
+
+## Branch-start command/evidence
+
+
+## Local/no-PR rationale
+
+
+## PR lifecycle
+
+
+## Retroactive PR needed
 
 
 ## Goal
