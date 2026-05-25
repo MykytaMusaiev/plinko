@@ -1,7 +1,7 @@
 Status: Partial
 Owner: Frontend
 Source of truth: source code and package.json
-Last verified: 2026-05-20
+Last verified: 2026-05-25
 Related files: src/app, src/features, src/shared, package.json
 
 # Architecture
@@ -30,6 +30,12 @@ Feature folders:
   state, config loading, and bet placement integration.
 - `src/features/history` contains the responsive authenticated bet history page
   UI and API wrapper for the existing local bets endpoint.
+- `src/features/profile` contains feature-local profile API wrappers, DTO
+  types, query keys, and profile mutation/query hooks. No profile page UI is
+  implemented yet.
+- `src/features/progression` contains feature-local progression API wrappers,
+  DTO types, query keys, and reward claim/query hooks. No progression page UI
+  is implemented yet.
 - `src/features/fair` exists but current files are empty.
 
 Shared layers:

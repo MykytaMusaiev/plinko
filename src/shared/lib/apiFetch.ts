@@ -26,6 +26,10 @@ function isAuthPath(path: string): boolean {
     return path.startsWith("/api/auth");
 }
 
+function isFormDataBody(body: BodyInit | null | undefined): body is FormData {
+    return typeof FormData !== "undefined" && body instanceof FormData;
+}
+
 function toErrorBody(body: unknown, fallbackPath: string): ApiErrorBody {
     if (!body || typeof body !== "object") {
         return {
@@ -80,7 +84,11 @@ export async function apiFetch<T>(
 
     const headers = new Headers(extraHeaders);
 
-    if (restOptions.body !== undefined && !headers.has("Content-Type")) {
+    if (
+        restOptions.body !== undefined &&
+        !isFormDataBody(restOptions.body) &&
+        !headers.has("Content-Type")
+    ) {
         headers.set("Content-Type", "application/json");
     }
 

@@ -53,6 +53,10 @@ async function refreshAuthTokens(
     return isAuthTokens(data) ? data : null;
 }
 
+function isFormDataBody(body: BodyInit | null | undefined): body is FormData {
+    return typeof FormData !== "undefined" && body instanceof FormData;
+}
+
 async function callBackend(
     path: string,
     options: Omit<BackendFetchOptions, "auth" | "retryOnUnauthorized">,
@@ -60,7 +64,11 @@ async function callBackend(
 ): Promise<Response> {
     const headers = new Headers(options.headers);
 
-    if (options.body !== undefined && !headers.has("Content-Type")) {
+    if (
+        options.body !== undefined &&
+        !isFormDataBody(options.body) &&
+        !headers.has("Content-Type")
+    ) {
         headers.set("Content-Type", "application/json");
     }
 
