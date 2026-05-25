@@ -80,6 +80,46 @@
       "architectureSensitive": false
     },
     {
+      "sourceGlob": "src/features/profile/**",
+      "relatedDocs": [
+        "docs/modules/profile.md",
+        "docs/api-boundary.md"
+      ],
+      "requiredOnChange": true,
+      "reason": "Profile feature changes affect profile API wrappers, profile server state, and the local BFF boundary.",
+      "architectureSensitive": true
+    },
+    {
+      "sourceGlob": "src/app/api/profile/**",
+      "relatedDocs": [
+        "docs/modules/profile.md",
+        "docs/api-boundary.md"
+      ],
+      "requiredOnChange": true,
+      "reason": "Profile BFF route changes affect protected backend proxy behavior, auth cookie update flow, and documented profile endpoints.",
+      "architectureSensitive": true
+    },
+    {
+      "sourceGlob": "src/features/progression/**",
+      "relatedDocs": [
+        "docs/modules/progression.md",
+        "docs/api-boundary.md"
+      ],
+      "requiredOnChange": true,
+      "reason": "Progression feature changes affect progression API wrappers, reward claim server state, and balance cache behavior.",
+      "architectureSensitive": true
+    },
+    {
+      "sourceGlob": "src/app/api/progression/**",
+      "relatedDocs": [
+        "docs/modules/progression.md",
+        "docs/api-boundary.md"
+      ],
+      "requiredOnChange": true,
+      "reason": "Progression BFF route changes affect protected backend proxy behavior, auth cookie update flow, and documented progression endpoints.",
+      "architectureSensitive": true
+    },
+    {
       "sourceGlob": "src/features/fair/**",
       "relatedDocs": [
         "docs/modules/fair.md"
