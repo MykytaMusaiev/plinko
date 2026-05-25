@@ -35,6 +35,7 @@ Known types:
 
 Partial:
 
+- A protected `/progression` route skeleton exists for app-shell navigation.
 - No Progression page UI is implemented in this foundation task.
 
 Unverified:

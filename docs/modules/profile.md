@@ -33,6 +33,7 @@ Known types:
 
 Partial:
 
+- A protected `/profile` route skeleton exists for app-shell navigation.
 - No Profile page UI is implemented in this foundation task.
 - Avatar upload is transitional plumbing. Actual avatar persistence depends on
   backend avatar storage readiness; the frontend does not add mock storage,

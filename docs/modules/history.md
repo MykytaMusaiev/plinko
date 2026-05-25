@@ -14,10 +14,10 @@ Planned:
 Implemented:
 
 - `/history` is a separate authenticated App Router page.
-- The game header History control navigates to `/history`.
-- The page uses a standalone dark layout with a top header, Back to Game link,
-  Bet History title, compact filters bar, and loading/empty/error/populated
-  states.
+- The protected `(game)` app shell bottom navigation handles route switching
+  between Game, History, Progression, and Profile.
+- The page uses a dark content layout with a top title header, compact filters
+  bar, and loading/empty/error/populated states.
 - `historyApi.listBets` delegates to the existing `betsApi.list` wrapper, so
   browser code still calls local `/api/bets`.
 - TanStack Query owns history list server state.
