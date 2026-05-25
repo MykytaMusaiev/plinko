@@ -16,6 +16,11 @@ Implemented:
   - `src/app/(auth)/register`
   - `src/app/(game)/game`
   - `src/app/(game)/history`
+  - `src/app/(game)/profile`
+  - `src/app/(game)/progression`
+- The protected `(game)` route group owns the authenticated app shell,
+  including the top app header with identity, balance, and logout, plus
+  shell-contained bottom navigation.
 - Next.js BFF route handlers live under `src/app/api`.
 - Root providers in `src/app/providers.tsx` configure TanStack Query, auth
   hydration, and Sonner toasts.
@@ -29,13 +34,14 @@ Feature folders:
 - `src/features/game` contains manual game controls, board rendering, game
   state, config loading, and bet placement integration.
 - `src/features/history` contains the responsive authenticated bet history page
-  UI and API wrapper for the existing local bets endpoint.
+  UI and API wrapper for the existing local bets endpoint. The shared protected
+  app shell owns route switching to and from History.
 - `src/features/profile` contains feature-local profile API wrappers, DTO
-  types, query keys, and profile mutation/query hooks. No profile page UI is
-  implemented yet.
+  types, query keys, and profile mutation/query hooks. Only a protected route
+  skeleton exists for the future profile page UI.
 - `src/features/progression` contains feature-local progression API wrappers,
-  DTO types, query keys, and reward claim/query hooks. No progression page UI
-  is implemented yet.
+  DTO types, query keys, and reward claim/query hooks. Only a protected route
+  skeleton exists for the future progression page UI.
 - `src/features/fair` exists but current files are empty.
 
 Shared layers:

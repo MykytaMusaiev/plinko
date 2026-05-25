@@ -35,10 +35,14 @@ Implemented:
 - Normal and fast playback share the same completion contract. Completion
   accepts the active result once, updates round readiness, reveals the winning
   bucket, clears `lastResult`, and allows the next action.
-- `GameLayout` structures the authenticated game screen into responsive top,
-  board, and controls zones. On desktop, it renders the existing `BetControls`
-  left rail. On mobile, it keeps the board first and renders `MobileBetHud`
-  below the board without duplicating betting state or submit behavior.
+- `GameLayout` structures the authenticated game screen into responsive board
+  and controls zones. On desktop, it renders the existing `BetControls` left
+  rail. On mobile, it keeps the board first and renders `MobileBetHud` below
+  the board without duplicating betting state or submit behavior.
+- The protected `(game)` app shell owns the top app header and bottom
+  navigation outside the Game feature. `GameLayout` fits within that shell
+  while preserving the existing desktop left rail, mobile betting HUD, and
+  board composition.
 - `GameBoard` owns the visual board composition and renders `PegGrid` with the
   attached `MultiplierBar` bucket row directly below it.
 - `GameBoard`, `PegGrid`, and `MultiplierBar` share the feature-local board
@@ -65,8 +69,8 @@ Implemented:
 - `MultiplierBar` reads `winningBucketIndex` from game state to show the
   winning bucket highlight and renders bucket labels as the attached board
   bucket row.
-- `UserHeader` links the History control to the authenticated `/history` page
-  and renders the auth-owned Logout control.
+- Balance and logout access are owned by the protected `(game)` app shell so
+  they remain available across protected routes.
 
 Current constraints:
 
