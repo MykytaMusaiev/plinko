@@ -230,11 +230,18 @@ Not run. No staging or commit requested.
   manual viewport QA should confirm mobile HUD and board still fit as intended.
 
 ## Artifact status / archival status
-Active. Do not archive before implementation, validation, review-gate handoff, and user-directed lifecycle closure.
+Archived after lifecycle closure.
+
+## Lifecycle closure note
+- PR merged into `feat/plinko`.
+- Manual QA passed.
+- Review passed.
+- Pre-commit readiness passed.
+- Validation passed.
+- Product result accepted.
 
 ## Archive commit verification
 Not applicable.
 
 ## Handoff / next step
-Implementation complete within the approved editable scope. Await user-directed
-next lifecycle step.
+Lifecycle closed.
