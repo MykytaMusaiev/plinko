@@ -59,6 +59,12 @@ automatically.
      not match the recorded base branch.
    - For local/no-PR mode, an explicit local/no-PR rationale is present.
 6. Compare changed files against the approved editable scope.
+   - For task artifact archive/move commits, confirm both sides of the move are
+     present in the staged or to-be-committed change: the
+     `.ai/tasks/active/...` deletion and the `.ai/tasks/archived/...`
+     addition.
+   - Prefer staging artifact archive/move commits with `git add -A .ai/tasks`.
+     Do not stage only the archived artifact file.
 7. Confirm review/code-quality gate evidence is present or explicitly not
    applicable.
 8. Run `pnpm lint` when applicable.
@@ -72,6 +78,11 @@ automatically.
    the current branch, local/no-PR rationale is missing, changed files exceed
    approved scope, review-gate evidence is missing, or required checks cannot
    run.
+14. After an artifact archive commit, verify the commit contains both sides of
+    the move with `git show --name-status --oneline --stat HEAD`; the expected
+    archive commit shows the active artifact removed and the archived artifact
+    added. Lifecycle closure is not complete when the artifact move is only
+    partially staged or committed.
 
 ## Output format
 
@@ -97,3 +108,5 @@ automatically.
 - Accepting missing, stale, or archived task artifacts.
 - Treating skipped validation as passing.
 - Forgetting API-boundary and docs-freshness checks when scripts exist.
+- Staging only `.ai/tasks/archived/...` for artifact archive commits and
+  missing the corresponding `.ai/tasks/active/...` deletion.

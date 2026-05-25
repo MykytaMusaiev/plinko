@@ -47,7 +47,12 @@ Use this flow for Codex-driven work in this repository.
     separate action.
 20. Archive the task artifact when the task is complete and archival is
     applicable.
-21. Return the required output contract.
+21. For artifact archive/move commits, stage both sides of the move. Prefer
+    `git add -A .ai/tasks`; do not stage only the archived artifact file.
+22. After an archive commit, verify the commit contains both the active
+    artifact deletion and archived artifact addition with
+    `git show --name-status --oneline --stat HEAD`.
+23. Return the required output contract.
 
 Task artifacts:
 
@@ -55,6 +60,9 @@ Task artifacts:
 - Use `.ai/tasks/TEMPLATE.md` as the starting structure.
 - Keep active work under `.ai/tasks/active/`.
 - Move completed task artifacts to `.ai/tasks/archived/`.
+- Lifecycle closure is not complete if a task artifact move is only partially
+  staged or committed. The expected archive commit shows the active artifact
+  removed and the archived artifact added.
 - Do not use one global mutable `session.md` as the source of truth.
 - Record approval, audit or plan source, branch mode, base branch, task branch,
   current branch at task start, branch-start status and evidence, local/no-PR

@@ -30,6 +30,12 @@ Required lifecycle:
 - Pre-commit readiness mechanically confirms the branch invariant before any
   manual commit.
 - Task artifacts are archived when applicable.
+- Artifact archive/move commits stage both sides of the move, preferably with
+  `git add -A .ai/tasks`; staging only the archived artifact file is not
+  sufficient.
+- After an artifact archive commit, `git show --name-status --oneline --stat
+  HEAD` confirms the active artifact was removed and the archived artifact was
+  added.
 
 Required for code changes:
 
@@ -57,6 +63,8 @@ Required for code changes:
   local/no-PR work without a rationale, unexpected changed files, and missing
   review-gate evidence when the gate applies.
 - Post-commit PR lifecycle remains manual unless separately requested.
+- Lifecycle closure is incomplete when an artifact archive/move is only
+  partially staged or committed.
 - Report skipped validation with a reason.
 
 Required final response:
