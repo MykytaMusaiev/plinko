@@ -218,8 +218,9 @@ Validation passed. No staging or commit requested.
   persistence depends on backend storage readiness.
 
 ## Artifact status / archival status
-Active. Do not archive in this task.
+Archived after PR merge into `feat/plinko`.
 
 ## Handoff / next step
-Ready for user review or a separate review skill pass. Do not archive until a
-future task explicitly requests it.
+Lifecycle closed after implementation, review, pre-commit readiness, commit,
+push, merge, and acceptance. Remote task branch was reported deleted by the
+user; no product files were changed during closure.
