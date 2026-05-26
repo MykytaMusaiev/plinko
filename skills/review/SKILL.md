@@ -42,7 +42,8 @@ Find correctness and process risks without modifying files.
 2. Check changed files against allowed paths.
 3. Inspect diffs and relevant current source.
 4. Review correctness, architecture, BFF boundary, auth/security, typing, state
-   ownership, docs freshness, and regression risk.
+   ownership, docs freshness, render/performance risk for UI or state-heavy
+   changes, and regression risk.
 5. Run the semantic code-quality checklist when the change touches code, UI,
    refactors, or architecture-sensitive areas.
 6. Verify validation evidence or note missing validation.
@@ -67,6 +68,13 @@ start, but it may block completion when structure debt remains.
   component files without a local reason.
 - State and data shaping: derived state is not duplicated unnecessarily, and
   view-model or adapter placement matches feature boundaries.
+- UI render/performance risk: visual components avoid unnecessarily broad
+  Zustand or TanStack Query subscriptions, suspicious `useEffect` plus
+  `setState` synchronization, expensive calculations directly in render, and
+  premature `memo`, `useMemo`, or `useCallback` without evidence.
+- UI QA handoff: UI/state-heavy changes record UI QA evidence when the active
+  task artifact marks UI QA as required, without requiring exact render counts
+  or automated profiling.
 - Refactor readiness: scoped refactors identify ownership, coupling, docs
   impact, validation, and review evidence before completion.
 
@@ -89,3 +97,4 @@ start, but it may block completion when structure debt remains.
   discovered.
 - Treating review as pre-implementation audit.
 - Ignoring unverified backend response shapes.
+- Treating qualitative render/performance review as a hard rerender-count gate.

@@ -25,11 +25,15 @@ Required lifecycle:
 - Implementation stays clean as it is generated, not only after review.
 - Changed files stay within the approved editable scope.
 - Related docs are updated or a docs-not-needed rationale is recorded.
+- UI QA evidence is recorded when the task changes visible UI, layout,
+  navigation, responsive behavior, animation, or high-frequency interaction.
 - Semantic review gate passes when required.
 - Mechanical validation passes or skipped checks are explained.
 - Pre-commit readiness mechanically confirms the branch invariant before any
   manual commit.
 - Task artifacts are archived when applicable.
+- Post-merge or final lifecycle closure uses `skills/lifecycle-close/SKILL.md`
+  when the user asks for it, and remains manual unless separately requested.
 - Artifact archive/move commits stage both sides of the move, preferably with
   `git add -A .ai/tasks`; staging only the archived artifact file is not
   sufficient.
@@ -53,6 +57,10 @@ Required for code changes:
 - Run the semantic review gate for UI, code, refactor, or
   architecture-sensitive changes. Review confirms implementation quality; it
   should not be the first safeguard against obvious structure problems.
+- For UI or state-heavy changes, review includes qualitative render/performance
+  risk such as broad Zustand/query subscriptions, duplicated derived state,
+  suspicious `useEffect` plus `setState` synchronization, expensive render
+  calculations, and premature memoization without evidence.
 - Run `pnpm lint` when applicable.
 - Run `pnpm build` when the change may affect build or runtime behavior.
 - Run `scripts/check-api-boundary.sh` when API/auth boundary behavior may be
@@ -61,7 +69,14 @@ Required for code changes:
 - Pre-commit readiness blocks missing or stale task artifacts, missing branch
   mode, PR-mode work on the recorded base branch, PR-mode branch mismatches,
   local/no-PR work without a rationale, unexpected changed files, and missing
-  review-gate evidence when the gate applies.
+  review-gate evidence when the gate applies. When UI QA is required,
+  pre-commit verifies recorded UI QA evidence only; it does not measure
+  rerenders, require exact render counts, or automate profiling.
+- Use the safest sufficient permissions for the task. Do not add tools,
+  automation, browser automation, Playwright, MCP, hooks, CI, or new scripts to
+  bypass sandbox friction without explicit approval. If sandbox/tooling blocks
+  validation, record the blocker and use approved manual evidence when
+  applicable.
 - Post-commit PR lifecycle remains manual unless separately requested.
 - Lifecycle closure is incomplete when an artifact archive/move is only
   partially staged or committed.

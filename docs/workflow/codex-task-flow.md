@@ -37,22 +37,35 @@ Use this flow for Codex-driven work in this repository.
    feature-oriented structure as the code is generated.
 13. Stop before changing files or behavior outside the approved scope.
 14. Update related docs or record a docs-not-needed rationale.
-15. Use `skills/review/SKILL.md` for the semantic code-quality review gate when
+15. When a task creates or changes visible UI, layout, navigation, responsive
+    behavior, animation, or high-frequency interaction, mark UI QA as required
+    in the active task artifact and use `skills/ui-qa/SKILL.md` after
+    implementation before pre-commit.
+16. Use the safest sufficient permissions for the task. Do not add tools,
+    automation, browser automation, Playwright, MCP, hooks, CI, or new scripts
+    to bypass sandbox friction without explicit approval. If sandbox/tooling
+    blocks validation, record the blocker and use approved manual evidence when
+    applicable; manual browser QA can be valid UI evidence when in-agent
+    browser or auth access is blocked.
+17. Use `skills/review/SKILL.md` for the semantic code-quality review gate when
     the change touches code, UI, refactors, or architecture-sensitive areas.
-16. Validate with available package scripts when applicable.
-17. Use `skills/pre-commit/SKILL.md` before any manual commit.
-18. Commit only when the user asks for it.
-19. Keep post-commit PR lifecycle manual; do not automate PR creation, merge,
+18. Validate with available package scripts when applicable.
+19. Use `skills/pre-commit/SKILL.md` before any manual commit.
+20. Commit only when the user asks for it.
+21. Keep post-commit PR lifecycle manual; do not automate PR creation, merge,
     branch deletion, staging, or committing unless the user asks for that
     separate action.
-20. Archive the task artifact when the task is complete and archival is
+22. Use `skills/lifecycle-close/SKILL.md` only when the user asks for manual
+    post-merge or final task closure and implementation, review, pre-commit,
+    commit, PR lifecycle, merge, and user acceptance are complete.
+23. Archive the task artifact when the task is complete and archival is
     applicable.
-21. For artifact archive/move commits, stage both sides of the move. Prefer
+24. For artifact archive/move commits, stage both sides of the move. Prefer
     `git add -A .ai/tasks`; do not stage only the archived artifact file.
-22. After an archive commit, verify the commit contains both the active
+25. After an archive commit, verify the commit contains both the active
     artifact deletion and archived artifact addition with
     `git show --name-status --oneline --stat HEAD`.
-23. Return the required output contract.
+26. Return the required output contract.
 
 Task artifacts:
 
@@ -69,6 +82,9 @@ Task artifacts:
   rationale when applicable, approved editable files, context-only files,
   ownership decisions when non-obvious, docs rationale, review-gate evidence,
   validation, pre-commit readiness, risks, and handoff notes.
+- Record UI QA requirement and evidence when applicable.
+- Record sandbox/tooling blockers and any approved manual evidence used in
+  place of blocked in-agent validation.
 - Keep implementation artifacts active until validation and pre-commit readiness
   are recorded, unless the user explicitly asks otherwise.
 - Put durable architecture decisions in `docs/decisions/`.
