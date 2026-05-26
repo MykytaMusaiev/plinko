@@ -160,6 +160,15 @@ When working on a task:
   readiness, and archive the task artifact only when applicable.
 - For multi-agent or worktree work, keep ownership boundaries explicit and avoid
   overlapping edits unless coordination is part of the task.
+- For visible UI, layout, navigation, responsive, animation, or high-frequency
+  interaction changes, record whether UI QA is required and use
+  `skills/ui-qa/SKILL.md` before pre-commit when required.
+- Use the safest sufficient permissions for the task. Do not add tools,
+  automation, browser automation, Playwright, MCP, hooks, CI, or new scripts to
+  bypass sandbox friction without explicit approval. If sandbox/tooling blocks
+  validation, record the blocker and use approved manual evidence when
+  applicable; manual browser QA can be valid evidence for UI tasks when
+  in-agent browser or auth access is blocked.
 
 # Change Discipline
 

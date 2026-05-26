@@ -32,6 +32,7 @@ automatically.
 - Presence or absence of validation scripts.
 - Review/code-quality gate evidence when code, UI, refactor, or
   architecture-sensitive changes require semantic review.
+- UI QA evidence when the active task artifact says UI QA is required.
 
 ## Restrictions
 
@@ -41,6 +42,8 @@ automatically.
   artifacts, stage files, or commit.
 - Do not invent validation scripts.
 - Do not replace semantic review; confirm review-gate evidence only.
+- Do not measure rerenders, require exact render counts, or perform profiler
+  automation.
 - Do not treat an archived, missing, or stale task artifact as ready.
 - Do not approve unexpected changed files without explicit scope approval.
 - Report skipped checks with reasons.
@@ -67,18 +70,20 @@ automatically.
      Do not stage only the archived artifact file.
 7. Confirm review/code-quality gate evidence is present or explicitly not
    applicable.
-8. Run `pnpm lint` when applicable.
-9. Run validation scripts if present.
-10. Run `check-api-boundary.sh` if present.
-11. Run `check-docs-freshness.sh` if present.
-12. Report Ready only when required checks pass or are explicitly not
+8. If the task artifact says UI QA is required, verify that UI QA evidence is
+   recorded. Do not measure rerenders or require exact render counts.
+9. Run `pnpm lint` when applicable.
+10. Run validation scripts if present.
+11. Run `check-api-boundary.sh` if present.
+12. Run `check-docs-freshness.sh` if present.
+13. Report Ready only when required checks pass or are explicitly not
    applicable.
-13. Report Blocked when validation fails, scope is unclear, the task artifact is
+14. Report Blocked when validation fails, scope is unclear, the task artifact is
    missing or stale, branch mode is missing, PR-mode branch fields do not match
    the current branch, local/no-PR rationale is missing, changed files exceed
-   approved scope, review-gate evidence is missing, or required checks cannot
-   run.
-14. After an artifact archive commit, verify the commit contains both sides of
+   approved scope, review-gate evidence is missing, UI QA evidence is missing
+   when required, or required checks cannot run.
+15. After an artifact archive commit, verify the commit contains both sides of
     the move with `git show --name-status --oneline --stat HEAD`; the expected
     archive commit shows the active artifact removed and the archived artifact
     added. Lifecycle closure is not complete when the artifact move is only
@@ -93,6 +98,7 @@ automatically.
 - Commands run
 - Validation result
 - Skipped checks and reasons
+- UI QA evidence status when required
 - Risks
 - Suggested Conventional Commit message
 
@@ -104,6 +110,8 @@ automatically.
 - Creating or switching branches during pre-commit instead of reporting the
   branch invariant status.
 - Performing semantic code review instead of checking for review evidence.
+- Performing UI render/performance analysis instead of checking for recorded UI
+  QA evidence.
 - Skipping changed-files-vs-approved-scope comparison.
 - Accepting missing, stale, or archived task artifacts.
 - Treating skipped validation as passing.

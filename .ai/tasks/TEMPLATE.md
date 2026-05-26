@@ -75,6 +75,15 @@
 ## Validation results
 
 
+## UI QA requirement
+
+
+## UI QA evidence
+
+
+## Sandbox / tooling blockers
+
+
 ## Docs freshness result
 
 

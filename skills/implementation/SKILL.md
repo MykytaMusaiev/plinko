@@ -33,6 +33,8 @@ Implement only the approved task scope with minimal, source-backed changes.
 - Relevant source files.
 - `docs/doc-mapping.json` when behavior or mapped source areas change.
 - Existing `package.json` scripts.
+- UI QA requirement and evidence plan when the task changes visible UI, layout,
+  navigation, responsive behavior, animation, or high-frequency interaction.
 
 ## Restrictions
 
@@ -47,6 +49,8 @@ Implement only the approved task scope with minimal, source-backed changes.
 - Do not create a retroactive PR for completed local/no-PR work.
 - Do not automate PR creation, merge, branch deletion, staging, or committing
   unless the user explicitly asks for that separate lifecycle action.
+- Do not add tools, automation, browser automation, Playwright, MCP, hooks, CI,
+  or new scripts to bypass sandbox friction without explicit approval.
 
 ## Workflow
 
@@ -77,12 +81,19 @@ Implement only the approved task scope with minimal, source-backed changes.
 10. Update related docs if behavior changes, using `docs/doc-mapping.json`.
 11. Keep the active task artifact current with files touched, docs rationale,
     validation, review-gate status, risks, and handoff notes.
-12. Run the before-completion self-check and hand off to the review gate when
+12. If the task creates or changes visible UI, layout, navigation, responsive
+    behavior, animation, or high-frequency interaction, mark UI QA as required
+    in the active task artifact and request or use `skills/ui-qa/SKILL.md`
+    after implementation before pre-commit.
+13. If sandbox or tooling access blocks validation, record the blocker and use
+    approved manual evidence when applicable. Manual browser QA can be valid
+    evidence for UI tasks when in-agent browser or auth access is blocked.
+14. Run the before-completion self-check and hand off to the review gate when
     code, UI, refactor, or architecture-sensitive changes require semantic
     review.
-13. Run applicable validation: `pnpm lint`; `pnpm build` when build/runtime may
+15. Run applicable validation: `pnpm lint`; `pnpm build` when build/runtime may
    be affected and the script exists.
-14. Report skipped validation with reasons.
+16. Report skipped validation with reasons.
 
 ## Generation-time structure rules
 
@@ -111,6 +122,9 @@ Implement only the approved task scope with minimal, source-backed changes.
 - Confirm repeated UI fragments, duplicated derived state, and non-trivial
   inline helpers/constants/types were handled during implementation.
 - Confirm mapped docs were updated or a docs-not-needed rationale was recorded.
+- Confirm UI QA is marked required and evidence is recorded when visible UI,
+  layout, navigation, responsive behavior, animation, or high-frequency
+  interaction changed.
 - Record review-gate handoff or not-applicable rationale in the task artifact.
 
 ## Output format
@@ -134,6 +148,8 @@ Implement only the approved task scope with minimal, source-backed changes.
 - Treating future docs, scripts, skills, or `.ai/tasks/` as existing.
 - Creating retroactive PRs for previously completed local work.
 - Letting implementation automate post-commit PR lifecycle steps.
+- Bypassing sandbox friction by adding unapproved tools, scripts, browser
+  automation, hooks, CI, Playwright, or MCP.
 - Calling backend `/api/v1/*` from browser code.
 - Waiting for review to catch obvious feature ownership or component structure
   issues.
