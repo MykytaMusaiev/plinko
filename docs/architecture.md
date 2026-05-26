@@ -37,8 +37,8 @@ Feature folders:
   UI and API wrapper for the existing local bets endpoint. The shared protected
   app shell owns route switching to and from History.
 - `src/features/profile` contains feature-local profile API wrappers, DTO
-  types, query keys, and profile mutation/query hooks. Only a protected route
-  skeleton exists for the future profile page UI.
+  types, query keys, profile mutation/query hooks, and the protected Profile
+  page content UI.
 - `src/features/progression` contains feature-local progression API wrappers,
   DTO types, query keys, and reward claim/query hooks. Only a protected route
   skeleton exists for the future progression page UI.
