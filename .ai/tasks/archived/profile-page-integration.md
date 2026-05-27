@@ -37,7 +37,9 @@ N/A.
 
 ## PR lifecycle
 
-No staging, commit, push, or PR creation requested.
+Complete. Manual commit was created, pushed, inspected in PR #8, merged into
+`feat/plinko`, and branch cleanup was completed outside this lifecycle-close
+step.
 
 ## Retroactive PR needed
 
@@ -178,6 +180,13 @@ block so module documentation reflects shell-owned balance display.
 
 ## Commands run
 
+- `Get-Content skills/lifecycle-close/SKILL.md`
+- `git status --short`
+- `git branch --show-current`
+- `git status --short --branch`
+- `Test-Path .ai/tasks/active/profile-page-integration.md; Test-Path .ai/tasks/archived/profile-page-integration.md`
+- `Get-Content .ai/tasks/active/profile-page-integration.md`
+- `git log --oneline --decorate -n 8`
 - `Get-Content skills/implementation/SKILL.md`
 - `git status --short`
 - `Get-Content skills/implementation/SKILL.md`
@@ -356,7 +365,8 @@ Completed. Semantic review result: PASS.
 
 ## Pre-commit readiness
 
-Not requested. No files were staged or committed.
+Completed before lifecycle close. Pre-commit readiness passed with no blockers.
+No staging or commit is performed by this lifecycle-close step.
 
 ## Risks
 
@@ -368,13 +378,15 @@ Not requested. No files were staged or committed.
 
 ## Artifact status / archival status
 
-Active.
+Archived during lifecycle close after implementation, review, pre-commit
+readiness, manual commit, PR merge, branch cleanup, and user acceptance were
+confirmed.
 
 ## Archive commit verification
 
-N/A.
+N/A. The archive move is not committed in this lifecycle-close step because the
+user requested no commit.
 
 ## Handoff / next step
 
-Proceed to pre-commit readiness; focused manual UI QA and semantic review found
-no blocking issues after the duplicate balance removal.
+Lifecycle closed. Commit the artifact archive move when ready.
