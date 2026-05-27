@@ -132,6 +132,29 @@ conventions justify it. Avoid creating folders for trivial one-off code.
 Move code to `src/shared` only for generic cross-feature or platform-level
 reuse. Do not move feature-specific code to `src/shared` for convenience.
 
+For JSX-heavy UI work, create a Stack Primitive Checklist in the active task
+artifact before implementation. The checklist should identify the owning
+feature, route/page thinness, expected page-content orchestrator, feature-local
+component split, and stack primitives to use.
+
+Route `page.tsx` files should stay thin. Page content components should
+orchestrate data, state, and feature sections rather than become component dump
+files. Prefer one primary non-trivial React component per file, and split
+non-trivial UI concepts into feature-local files as they are generated.
+
+Generic React output is not acceptable when this repository's stack provides a
+project or framework primitive. Use Next.js and project primitives where
+applicable, including `next/image` instead of raw `<img>`, Next.js/project
+routing primitives for internal navigation, Server Components by default in App
+Router code, TanStack Query for server state, existing BFF clients/helpers for
+browser-facing API calls, and existing React Hook Form/Zod patterns for
+non-trivial forms when applicable.
+
+Suppressions and framework bypasses require explicit approval and task-artifact
+rationale before use. This includes `eslint-disable`, `@ts-ignore`,
+`@ts-expect-error`, `@ts-nocheck`, raw `<img>` in Next.js UI, framework-rule
+suppressions, and similar bypass markers.
+
 Do not introduce broad app refactors unless the user explicitly asks for them.
 Keep changes scoped to the active task.
 
@@ -154,7 +177,8 @@ When working on a task:
   task artifact.
 - For implementation work, plan ownership and file placement before editing,
   create or update an active task artifact before edits, track approved editable
-  files separately from context-only files, implement clean feature-oriented
+  files separately from context-only files, record the Stack Primitive Checklist
+  before JSX-heavy UI work, implement clean feature-oriented
   structure as you go, update docs or record a docs-not-needed rationale, pass
   the semantic review gate when required, run validation, complete pre-commit
   readiness, and archive the task artifact only when applicable.

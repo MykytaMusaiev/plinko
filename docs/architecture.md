@@ -61,6 +61,19 @@ Architecture rules:
 - Keep feature-specific code inside its feature module.
 - Use `src/shared` only for generic reusable logic.
 - Do not move backend API calls into browser runtime code.
+- Route `page.tsx` files stay thin and delegate page content to feature-owned
+  UI.
+- Page content components orchestrate feature sections, data/state hooks, and
+  interaction wiring; non-trivial UI concepts are split into feature-local
+  component files.
+- Feature-specific helpers, constants, mappers, formatters, adapters, and view
+  models belong in the owning feature model/lib area when they are not generic
+  reuse.
+- Use repository stack primitives instead of generic React output when
+  applicable: `next/image` for images, Next.js/project routing primitives for
+  internal navigation, local BFF helpers for browser API calls, TanStack Query
+  for server state, and existing React Hook Form/Zod patterns for non-trivial
+  forms.
 
 Planned:
 

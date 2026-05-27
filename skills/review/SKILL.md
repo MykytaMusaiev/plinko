@@ -29,6 +29,8 @@ Find correctness and process risks without modifying files.
 - `git status --short` and relevant diffs.
 - Changed files and related source/docs.
 - `AGENTS.md`, `docs/doc-mapping.json`, and relevant ADRs when applicable.
+- Active task artifact when the change includes UI, stack primitive choices, or
+  suppression/bypass approvals.
 
 ## Restrictions
 
@@ -56,6 +58,10 @@ start, but it may block completion when structure debt remains.
 
 - UI/component quality: components have clear responsibility and stay focused on
   rendering, composition, hook usage, and event wiring.
+- Route/page thinness: route `page.tsx` files stay thin, and page content
+  components orchestrate feature sections instead of becoming component dumps.
+- Component decomposition: one primary non-trivial React component per file is
+  preferred, and non-trivial UI concepts are split into feature-local files.
 - Feature ownership: feature-specific helpers, utils, lib, constants, config,
   types, adapters, view models, model logic, and API wrappers stay in the owning
   feature.
@@ -68,6 +74,17 @@ start, but it may block completion when structure debt remains.
   component files without a local reason.
 - State and data shaping: derived state is not duplicated unnecessarily, and
   view-model or adapter placement matches feature boundaries.
+- Stack primitives: generic React output is blocked when this repository stack
+  has a project or framework primitive. Next.js UI uses `next/image` instead of
+  raw `<img>` unless approved, internal navigation uses Next.js/project routing
+  primitives, App Router code defaults to Server Components, browser API calls
+  use local BFF clients/helpers, server state follows TanStack Query patterns,
+  and non-trivial forms follow existing React Hook Form/Zod patterns when
+  applicable.
+- Suppressions and bypasses: `eslint-disable`, `@ts-ignore`,
+  `@ts-expect-error`, `@ts-nocheck`, framework-rule suppressions, raw `<img>`
+  in Next.js UI, and similar bypasses block review unless explicitly approved
+  and explained in the active task artifact.
 - UI render/performance risk: visual components avoid unnecessarily broad
   Zustand or TanStack Query subscriptions, suspicious `useEffect` plus
   `setState` synchronization, expensive calculations directly in render, and
@@ -95,6 +112,9 @@ start, but it may block completion when structure debt remains.
 - Treating docs file presence as semantic correctness.
 - Treating review as the first place where obvious structure problems should be
   discovered.
+- Allowing generic React primitives when the stack provides a better
+  project/framework primitive.
+- Accepting unapproved suppressions or framework bypasses as local cleanup.
 - Treating review as pre-implementation audit.
 - Ignoring unverified backend response shapes.
 - Treating qualitative render/performance review as a hard rerender-count gate.

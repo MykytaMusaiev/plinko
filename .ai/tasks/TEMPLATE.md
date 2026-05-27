@@ -63,6 +63,12 @@
 ## Architecture-sensitive changes
 
 
+## Stack Primitive Checklist
+
+
+## Suppression / framework-bypass approvals
+
+
 ## Implementation summary
 
 

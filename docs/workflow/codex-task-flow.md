@@ -31,41 +31,45 @@ Use this flow for Codex-driven work in this repository.
 10. For Next.js code changes, read the relevant local docs under
    `node_modules/next/dist/docs/`.
 11. Before implementation, identify the owning feature and expected file
-   placement for component code, helpers, constants, config, types, adapters,
-   view models, API wrappers, and model logic.
-12. Make the smallest scoped change that satisfies the task, keeping clean
-   feature-oriented structure as the code is generated.
-13. Stop before changing files or behavior outside the approved scope.
-14. Update related docs or record a docs-not-needed rationale.
-15. When a task creates or changes visible UI, layout, navigation, responsive
+    placement for component code, helpers, constants, config, types, adapters,
+    view models, API wrappers, and model logic.
+12. Before JSX-heavy UI work, record a Stack Primitive Checklist in the active
+    task artifact. Include route/page thinness, page-content orchestration,
+    feature-local component split, data/state/form ownership, project/framework
+    primitives, and any approved suppressions or bypasses.
+13. Make the smallest scoped change that satisfies the task, keeping clean
+    feature-oriented structure as the code is generated.
+14. Stop before changing files or behavior outside the approved scope.
+15. Update related docs or record a docs-not-needed rationale.
+16. When a task creates or changes visible UI, layout, navigation, responsive
     behavior, animation, or high-frequency interaction, mark UI QA as required
     in the active task artifact and use `skills/ui-qa/SKILL.md` after
     implementation before pre-commit.
-16. Use the safest sufficient permissions for the task. Do not add tools,
+17. Use the safest sufficient permissions for the task. Do not add tools,
     automation, browser automation, Playwright, MCP, hooks, CI, or new scripts
     to bypass sandbox friction without explicit approval. If sandbox/tooling
     blocks validation, record the blocker and use approved manual evidence when
     applicable; manual browser QA can be valid UI evidence when in-agent
     browser or auth access is blocked.
-17. Use `skills/review/SKILL.md` for the semantic code-quality review gate when
+18. Use `skills/review/SKILL.md` for the semantic code-quality review gate when
     the change touches code, UI, refactors, or architecture-sensitive areas.
-18. Validate with available package scripts when applicable.
-19. Use `skills/pre-commit/SKILL.md` before any manual commit.
-20. Commit only when the user asks for it.
-21. Keep post-commit PR lifecycle manual; do not automate PR creation, merge,
+19. Validate with available package scripts when applicable.
+20. Use `skills/pre-commit/SKILL.md` before any manual commit.
+21. Commit only when the user asks for it.
+22. Keep post-commit PR lifecycle manual; do not automate PR creation, merge,
     branch deletion, staging, or committing unless the user asks for that
     separate action.
-22. Use `skills/lifecycle-close/SKILL.md` only when the user asks for manual
+23. Use `skills/lifecycle-close/SKILL.md` only when the user asks for manual
     post-merge or final task closure and implementation, review, pre-commit,
     commit, PR lifecycle, merge, and user acceptance are complete.
-23. Archive the task artifact when the task is complete and archival is
+24. Archive the task artifact when the task is complete and archival is
     applicable.
-24. For artifact archive/move commits, stage both sides of the move. Prefer
+25. For artifact archive/move commits, stage both sides of the move. Prefer
     `git add -A .ai/tasks`; do not stage only the archived artifact file.
-25. After an archive commit, verify the commit contains both the active
+26. After an archive commit, verify the commit contains both the active
     artifact deletion and archived artifact addition with
     `git show --name-status --oneline --stat HEAD`.
-26. Return the required output contract.
+27. Return the required output contract.
 
 Task artifacts:
 
@@ -80,8 +84,10 @@ Task artifacts:
 - Record approval, audit or plan source, branch mode, base branch, task branch,
   current branch at task start, branch-start status and evidence, local/no-PR
   rationale when applicable, approved editable files, context-only files,
-  ownership decisions when non-obvious, docs rationale, review-gate evidence,
-  validation, pre-commit readiness, risks, and handoff notes.
+  ownership decisions when non-obvious, Stack Primitive Checklist for
+  JSX-heavy UI work, suppression or framework-bypass approvals, docs rationale,
+  review-gate evidence, validation, pre-commit readiness, risks, and handoff
+  notes.
 - Record UI QA requirement and evidence when applicable.
 - Record sandbox/tooling blockers and any approved manual evidence used in
   place of blocked in-agent validation.

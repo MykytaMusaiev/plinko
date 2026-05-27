@@ -143,6 +143,17 @@
       "architectureSensitive": true
     },
     {
+      "sourceGlob": "AGENTS.md",
+      "relatedDocs": [
+        "docs/architecture.md",
+        "docs/workflow/codex-task-flow.md",
+        "docs/workflow/definition-of-done.md"
+      ],
+      "requiredOnChange": true,
+      "reason": "Repository operating rule changes affect architecture and workflow expectations.",
+      "architectureSensitive": true
+    },
+    {
       "sourceGlob": "package.json",
       "relatedDocs": [
         "AGENTS.md",
@@ -152,6 +163,16 @@
       "requiredOnChange": true,
       "reason": "Package, dependency, and script changes affect repository operating rules, stack docs, and validation expectations.",
       "architectureSensitive": true
+    },
+    {
+      "sourceGlob": ".ai/tasks/TEMPLATE.md",
+      "relatedDocs": [
+        "docs/workflow/codex-task-flow.md",
+        "docs/workflow/definition-of-done.md"
+      ],
+      "requiredOnChange": true,
+      "reason": "Task artifact template changes affect task-flow records and definition-of-done evidence expectations.",
+      "architectureSensitive": false
     },
     {
       "sourceGlob": "scripts/**",
@@ -165,10 +186,11 @@
     {
       "sourceGlob": "skills/**",
       "relatedDocs": [
-        "docs/workflow/codex-task-flow.md"
+        "docs/workflow/codex-task-flow.md",
+        "docs/workflow/definition-of-done.md"
       ],
       "requiredOnChange": true,
-      "reason": "Repo-local skill changes affect Codex task flow and agent operating expectations.",
+      "reason": "Repo-local skill changes affect Codex task flow, review gates, and definition-of-done expectations.",
       "architectureSensitive": false
     }
   ]
