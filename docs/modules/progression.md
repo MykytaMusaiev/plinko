@@ -1,7 +1,7 @@
-Status: Partial
+Status: Implemented
 Owner: Frontend
 Source of truth: src/app/api/progression, src/features/progression
-Last verified: 2026-05-25
+Last verified: 2026-05-27
 Related files: src/app/api/progression, src/features/progression
 
 # Progression Module
@@ -25,6 +25,25 @@ Implemented:
   `response.reward.balanceAfter`.
 - Reward claim hooks invalidate `["profile", "me"]` so profile balance and
   progression summary are refreshed when a profile query is in use.
+- The protected `/progression` route renders Progression content inside the
+  existing authenticated app shell.
+- `ProgressionPageContent` is the feature-local client orchestrator for
+  progression query state and reward claim mutations.
+- The page renders level, total XP, XP progress toward the next level, daily
+  reward credits and XP, current streak, next claim availability, daily
+  missions, starter missions, mission progress, and mission credit/XP rewards.
+- Daily reward claim UI uses `daily.canClaim` and mutation pending state. When
+  `daily.canClaim` is false, the UI renders an unavailable-later state rather
+  than a claimed state because the daily DTO does not expose a claimed-specific
+  field.
+- Mission claim UI uses `mission.claimedAt`, `mission.claimable`, a real
+  non-null `mission.id`, and matching mutation pending state. Mission claim
+  buttons never call the claim endpoint without a real mission id.
+- Mission cards do not use `mission.type` or `mission.status`; those fields
+  remain defensive unknowns until the backend contract exposes concrete enum
+  values.
+- Loading, error/retry, empty mission-section, incomplete, claimable, claiming,
+  claimed, and unavailable states are implemented.
 
 Known types:
 
@@ -35,8 +54,9 @@ Known types:
 
 Partial:
 
-- A protected `/progression` route skeleton exists for app-shell navigation.
-- No Progression page UI is implemented in this foundation task.
+- Daily reward claimed-versus-later display remains limited by the current DTO:
+  `canClaim: false` is rendered as unavailable later, not as a claimed-specific
+  state.
 
 Unverified:
 
