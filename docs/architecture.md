@@ -40,8 +40,8 @@ Feature folders:
   types, query keys, profile mutation/query hooks, and the protected Profile
   page content UI.
 - `src/features/progression` contains feature-local progression API wrappers,
-  DTO types, query keys, and reward claim/query hooks. Only a protected route
-  skeleton exists for the future progression page UI.
+  DTO types, query keys, reward claim/query hooks, view-model helpers, and the
+  protected Progression page content UI.
 - `src/features/fair` exists but current files are empty.
 
 Shared layers:
