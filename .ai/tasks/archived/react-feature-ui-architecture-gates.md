@@ -39,7 +39,10 @@ Not applicable.
 
 ## PR lifecycle
 
-No PR created in this task.
+PR-mode completed. GitHub PR #9 from
+`MykytaMusaiev/codex-stack-aware-react-quality-gates` into `feat/plinko` was
+reviewed in GitHub Files changed, merged manually, and the remote task branch
+was deleted manually.
 
 ## Retroactive PR needed
 
@@ -209,6 +212,14 @@ task.
 - `rg -n "docs[- ]not[- ]needed|documentation[- ]not[- ]needed" .ai/tasks/active/react-feature-ui-architecture-gates.md`
 - `git diff --check`
 - `C:\Program Files\Git\bin\bash.exe -lc "cd /d/react/evoverse/internship/plinko && scripts/check-docs-freshness.sh"`
+- `Get-Content -Raw skills/lifecycle-close/SKILL.md`
+- `git status --short --branch`
+- `git log --oneline --decorate -n 20`
+- `git switch feat/plinko`
+- `git log --oneline --decorate -n 5`
+- `git branch --list codex-stack-aware-react-quality-gates`
+- `git rev-parse feat/plinko`
+- `git rev-parse origin/feat/plinko`
 
 ## Validation results
 
@@ -231,6 +242,13 @@ task.
 - PASS: rerun `git diff --check`.
 - PASS: rerun `scripts/check-docs-freshness.sh` with plain output:
   `PASS: Documentation freshness check passed.`
+- Lifecycle close pre-archive checks:
+  - PASS: current branch is `feat/plinko`.
+  - PASS: `feat/plinko` and `origin/feat/plinko` both resolve to
+    `3b405b723a33d29aed80dae0d350c9cb7bc647cf`.
+  - PASS: merge evidence is present at HEAD:
+    `3b405b7 Merge pull request #9 from MykytaMusaiev/codex-stack-aware-react-quality-gates`.
+  - PASS: working tree was clean before archival.
 
 ## UI QA requirement
 
@@ -268,10 +286,10 @@ primitive review.
 
 ## Pre-commit readiness
 
-Not run as a separate pre-commit skill because the user requested
-implementation and validation only. Mechanical readiness evidence is present:
-branch invariant matches PR-mode fields, changed files are within approved
-scope, validation passed, and suppression/bypass scan rationale is recorded.
+Ready. Separate pre-commit readiness completed after the blocker fix; changed
+files matched approved scope, branch invariant passed, validation passed, UI QA
+was not required, and the suggested commit was
+`chore(workflow): harden stack-aware React UI gates`.
 
 ## Risks
 
@@ -283,13 +301,16 @@ scope, validation passed, and suppression/bypass scan rationale is recorded.
 
 ## Artifact status / archival status
 
-Active; do not archive in this task.
+Ready to archive during lifecycle close.
 
 ## Archive commit verification
 
-Not applicable.
+Pending archive move commit verification.
 
 ## Handoff / next step
 
-Previous semantic review blocker is resolved. Ready for user review or a
-separate pre-commit readiness check. Do not archive or stage in this task.
+Lifecycle close in progress. Move this artifact to
+`.ai/tasks/archived/react-feature-ui-architecture-gates.md`, stage the full
+artifact move with `git add -A .ai/tasks`, commit only the artifact archive
+move, and verify the commit contains both the active deletion and archived
+addition.
