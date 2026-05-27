@@ -9,7 +9,9 @@ description: Perform qualitative UI QA for Plinko visible UI changes. Use after 
 
 Record practical evidence that visible UI changes render correctly, remain
 usable across expected viewports, and do not introduce obvious interaction or
-render/performance risks.
+render/performance risks. UI QA does not replace React architecture review,
+feature-local decomposition review, or stack/project/framework primitive
+review.
 
 ## When to use
 
@@ -24,6 +26,8 @@ render/performance risks.
   visible UI impact.
 - The user explicitly limits the work to a different read-only review.
 - The task requires automated browser tooling that is not already approved.
+- The only unresolved question is component architecture, ownership, stack
+  primitive usage, or suppression approval; use review for that.
 
 ## Required context
 
@@ -42,6 +46,8 @@ render/performance risks.
 - Do not require exact render counts.
 - Do not add React Profiler automation.
 - Do not optimize preemptively without evidence.
+- Do not approve component structure, feature ownership, stack primitive
+  choices, or suppressions as a substitute for semantic code review.
 - Do not treat unavailable in-agent browser/auth access as automatic failure
   when approved manual evidence can cover the UI risk.
 
@@ -106,6 +112,8 @@ render/performance risks.
 ## Common mistakes
 
 - Treating UI QA as automated test creation.
+- Treating visual QA as approval for React architecture, stack primitive
+  choices, or suppressions.
 - Blocking completion on exact render counts.
 - Adding profiler or browser automation without approval.
 - Optimizing with memoization before a real risk is observed.

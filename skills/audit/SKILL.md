@@ -30,6 +30,8 @@ Prepare a minimal, source-backed implementation scope without editing files.
 - User goal, non-goals, and restrictions.
 - `AGENTS.md`.
 - Relevant source, docs, local skills, and validation scripts.
+- Current stack from `package.json` and architecture docs when UI or framework
+  primitive choices may be affected.
 - `docs/doc-mapping.json` when source or workflow ownership may affect docs.
 
 ## Restrictions
@@ -44,11 +46,14 @@ Prepare a minimal, source-backed implementation scope without editing files.
 1. Confirm the user goal, non-goals, and approval constraints.
 2. Find related source, docs, BFF/API routes, hooks, stores, services, helpers,
    types, constants, and validation scripts.
-3. Identify the owning feature or workflow layer.
-4. Separate proposed editable files from context-only files.
-5. Check `docs/doc-mapping.json` for required docs impact.
-6. Identify risks, approval needs, and stop conditions.
-7. Recommend the next skill or mode, usually implementation, review, or stop
+3. For UI or React feature work, identify route/page ownership, page-content
+   orchestration, feature-local decomposition needs, stack primitives, and any
+   likely suppression or framework-bypass risks before proposing editable scope.
+4. Identify the owning feature or workflow layer.
+5. Separate proposed editable files from context-only files.
+6. Check `docs/doc-mapping.json` for required docs impact.
+7. Identify risks, approval needs, and stop conditions.
+8. Recommend the next skill or mode, usually implementation, review, or stop
    for user approval.
 
 ## Output format
@@ -58,6 +63,7 @@ Prepare a minimal, source-backed implementation scope without editing files.
 - Current structure summary
 - Proposed editable scope
 - Context-only files
+- Stack primitive and suppression risks when applicable
 - Risks and stop conditions
 - Recommended next skill or mode
 

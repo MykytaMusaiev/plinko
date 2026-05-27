@@ -33,6 +33,8 @@ Implement only the approved task scope with minimal, source-backed changes.
 - Relevant source files.
 - `docs/doc-mapping.json` when behavior or mapped source areas change.
 - Existing `package.json` scripts.
+- Stack Primitive Checklist in the active task artifact before JSX-heavy UI
+  implementation.
 - UI QA requirement and evidence plan when the task changes visible UI, layout,
   navigation, responsive behavior, animation, or high-frequency interaction.
 
@@ -75,30 +77,38 @@ Implement only the approved task scope with minimal, source-backed changes.
    ownership, what belongs in component files, what belongs in feature-local
    helpers/utils/lib/constants/config/types/model/api, and what must not move to
    `src/shared`.
-7. Stop and ask before changing files or behavior outside the approved scope.
-8. Use existing patterns and feature boundaries.
-9. Implement the smallest change that satisfies the task.
-10. Update related docs if behavior changes, using `docs/doc-mapping.json`.
-11. Keep the active task artifact current with files touched, docs rationale,
+7. Before JSX-heavy UI work, record a Stack Primitive Checklist in the active
+   task artifact covering route/page thinness, page-content orchestration,
+   feature-local component split, data/state/form ownership, project/framework
+   primitives, and any approved suppressions or bypasses.
+8. Stop and ask before changing files or behavior outside the approved scope.
+9. Use existing patterns and feature boundaries.
+10. Implement the smallest change that satisfies the task.
+11. Update related docs if behavior changes, using `docs/doc-mapping.json`.
+12. Keep the active task artifact current with files touched, docs rationale,
     validation, review-gate status, risks, and handoff notes.
-12. If the task creates or changes visible UI, layout, navigation, responsive
+13. If the task creates or changes visible UI, layout, navigation, responsive
     behavior, animation, or high-frequency interaction, mark UI QA as required
     in the active task artifact and request or use `skills/ui-qa/SKILL.md`
     after implementation before pre-commit.
-13. If sandbox or tooling access blocks validation, record the blocker and use
+14. If sandbox or tooling access blocks validation, record the blocker and use
     approved manual evidence when applicable. Manual browser QA can be valid
     evidence for UI tasks when in-agent browser or auth access is blocked.
-14. Run the before-completion self-check and hand off to the review gate when
+15. Run the before-completion self-check and hand off to the review gate when
     code, UI, refactor, or architecture-sensitive changes require semantic
     review.
-15. Run applicable validation: `pnpm lint`; `pnpm build` when build/runtime may
+16. Run applicable validation: `pnpm lint`; `pnpm build` when build/runtime may
    be affected and the script exists.
-16. Report skipped validation with reasons.
+17. Report skipped validation with reasons.
 
 ## Generation-time structure rules
 
 - Keep React component files focused on rendering, composition, hook usage, and
   event wiring.
+- Keep route `page.tsx` files thin; page content components should orchestrate
+  feature sections rather than collect all UI details in one file.
+- Prefer one primary non-trivial React component per file. Split non-trivial UI
+  concepts into feature-local files before a component becomes a dump file.
 - Extract non-trivial helpers, formatters, filters, mappers, constants, option
   lists, DTO adapters, and view-model builders during implementation rather than
   waiting for review to discover obvious structure debt.
@@ -107,6 +117,16 @@ Implement only the approved task scope with minimal, source-backed changes.
 - Avoid new folders for trivial one-off code.
 - Move code to `src/shared` only for generic cross-feature or platform-level
   reuse, never for feature-specific convenience.
+- Use repository stack primitives instead of generic React output when
+  applicable: `next/image` over raw `<img>`, Next.js/project routing primitives
+  for internal navigation, Server Components by default in App Router code,
+  local BFF clients/helpers for browser-facing API calls, TanStack Query for
+  server state, and existing React Hook Form/Zod form patterns for non-trivial
+  forms.
+- Do not add `eslint-disable`, `@ts-ignore`, `@ts-expect-error`,
+  `@ts-nocheck`, raw `<img>` in Next.js UI, framework-rule suppressions, or
+  similar bypasses unless explicitly approved and recorded in the active task
+  artifact.
 
 ## Before-completion self-check
 
@@ -119,8 +139,12 @@ Implement only the approved task scope with minimal, source-backed changes.
     branch-start evidence.
   - Local/no-PR mode records an explicit rationale.
 - Confirm feature-local ownership and component responsibility are clean.
+- Confirm the Stack Primitive Checklist was completed before JSX-heavy UI work
+  or record why it was not applicable.
 - Confirm repeated UI fragments, duplicated derived state, and non-trivial
   inline helpers/constants/types were handled during implementation.
+- Confirm stack/project/framework primitives were used where applicable and any
+  approved suppressions or bypasses have task-artifact rationale.
 - Confirm mapped docs were updated or a docs-not-needed rationale was recorded.
 - Confirm UI QA is marked required and evidence is recorded when visible UI,
   layout, navigation, responsive behavior, animation, or high-frequency

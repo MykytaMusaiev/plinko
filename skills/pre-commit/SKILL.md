@@ -32,6 +32,8 @@ automatically.
 - Presence or absence of validation scripts.
 - Review/code-quality gate evidence when code, UI, refactor, or
   architecture-sensitive changes require semantic review.
+- Approved suppression or framework-bypass rationale from the active task
+  artifact when changed files contain bypass markers.
 - UI QA evidence when the active task artifact says UI QA is required.
 
 ## Restrictions
@@ -42,6 +44,8 @@ automatically.
   artifacts, stage files, or commit.
 - Do not invent validation scripts.
 - Do not replace semantic review; confirm review-gate evidence only.
+- Do not perform stack primitive semantic review; only scan for obvious bypass
+  markers and require recorded approval/rationale.
 - Do not measure rerenders, require exact render counts, or perform profiler
   automation.
 - Do not treat an archived, missing, or stale task artifact as ready.
@@ -68,22 +72,31 @@ automatically.
      addition.
    - Prefer staging artifact archive/move commits with `git add -A .ai/tasks`.
      Do not stage only the archived artifact file.
-7. Confirm review/code-quality gate evidence is present or explicitly not
+7. Mechanically scan changed text files for obvious suppression or framework
+   bypass markers: `eslint-disable`, `@ts-ignore`, `@ts-expect-error`,
+   `@ts-nocheck`, `biome-ignore`, raw `<img`, `no-img-element`, and
+   `NEXT_PUBLIC_API_BASE`.
+   - Block when markers are found unless the active task artifact records
+     explicit approval and rationale for each intentional bypass.
+   - Treat scan false positives as requiring a short task-artifact rationale,
+     not as permission to ignore the scan.
+8. Confirm review/code-quality gate evidence is present or explicitly not
    applicable.
-8. If the task artifact says UI QA is required, verify that UI QA evidence is
+9. If the task artifact says UI QA is required, verify that UI QA evidence is
    recorded. Do not measure rerenders or require exact render counts.
-9. Run `pnpm lint` when applicable.
-10. Run validation scripts if present.
-11. Run `check-api-boundary.sh` if present.
-12. Run `check-docs-freshness.sh` if present.
-13. Report Ready only when required checks pass or are explicitly not
+10. Run `pnpm lint` when applicable.
+11. Run validation scripts if present.
+12. Run `check-api-boundary.sh` if present.
+13. Run `check-docs-freshness.sh` if present.
+14. Report Ready only when required checks pass or are explicitly not
    applicable.
-14. Report Blocked when validation fails, scope is unclear, the task artifact is
+15. Report Blocked when validation fails, scope is unclear, the task artifact is
    missing or stale, branch mode is missing, PR-mode branch fields do not match
    the current branch, local/no-PR rationale is missing, changed files exceed
-   approved scope, review-gate evidence is missing, UI QA evidence is missing
-   when required, or required checks cannot run.
-15. After an artifact archive commit, verify the commit contains both sides of
+   approved scope, suppression/bypass markers lack approved rationale,
+   review-gate evidence is missing, UI QA evidence is missing when required, or
+   required checks cannot run.
+16. After an artifact archive commit, verify the commit contains both sides of
     the move with `git show --name-status --oneline --stat HEAD`; the expected
     archive commit shows the active artifact removed and the archived artifact
     added. Lifecycle closure is not complete when the artifact move is only
@@ -97,6 +110,7 @@ automatically.
 - Branch invariant status
 - Commands run
 - Validation result
+- Suppression/bypass scan result
 - Skipped checks and reasons
 - UI QA evidence status when required
 - Risks
@@ -110,6 +124,10 @@ automatically.
 - Creating or switching branches during pre-commit instead of reporting the
   branch invariant status.
 - Performing semantic code review instead of checking for review evidence.
+- Treating a clean bypass-marker scan as proof that stack primitive review is
+  complete.
+- Allowing suppression or framework-bypass markers without explicit
+  task-artifact approval and rationale.
 - Performing UI render/performance analysis instead of checking for recorded UI
   QA evidence.
 - Skipping changed-files-vs-approved-scope comparison.
