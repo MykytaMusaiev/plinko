@@ -2,11 +2,11 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { REVEAL_MS, useGameStore } from '../model/game.store';
-import { useAuthStore } from '@/features/auth/model/auth.store';
 import { createBoardGeometry } from '../lib/boardGeometry';
 import { MultiplierBar } from './MultiplierBar';
 import { PegGrid } from './PegGrid';
-import type { BetResponse, GameConfig } from '@/shared/types/api.types';
+import type { GameConfig } from '@/shared/types/api.types';
+import type { VisualRound } from '../model/game.store';
 
 interface GameBoardProps {
   config: GameConfig;
@@ -15,8 +15,13 @@ interface GameBoardProps {
 const MOBILE_BOARD_MAX_WIDTH = 640;
 
 export function GameBoard({ config }: GameBoardProps) {
-  const { selectedRows, playbackMode, lastResult, completeRound, clearReveal } = useGameStore();
-  const { user, setUser } = useAuthStore();
+  const {
+    selectedRows,
+    playbackMode,
+    activeVisualRounds,
+    completeVisualRound,
+    pruneVisualRound,
+  } = useGameStore();
   const frameRef = useRef<HTMLDivElement>(null);
   const [availableSize, setAvailableSize] = useState({ width: 0, height: 0 });
 
@@ -56,30 +61,35 @@ export function GameBoard({ config }: GameBoardProps) {
   );
 
   const completePlayback = useCallback(
-    (result: BetResponse) => {
-      const didComplete = completeRound(result);
+    (round: VisualRound) => {
+      const didComplete = completeVisualRound(round.roundId);
 
       if (!didComplete) return;
 
-      if (user) setUser({ ...user, balance: result.balanceAfter });
-
-      window.setTimeout(() => clearReveal(result.betId), REVEAL_MS);
+      window.setTimeout(() => pruneVisualRound(round.roundId), REVEAL_MS);
     },
-    [clearReveal, completeRound, setUser, user],
+    [completeVisualRound, pruneVisualRound],
   );
 
   useEffect(() => {
-    if (playbackMode !== 'fast' || !lastResult) return;
+    if (playbackMode !== 'fast') return;
 
-    completePlayback(lastResult);
-  }, [completePlayback, lastResult, playbackMode]);
+    activeVisualRounds
+      .filter((round) => round.status === 'active')
+      .forEach((round) => completePlayback(round));
+  }, [activeVisualRounds, completePlayback, playbackMode]);
+
+  const animatingRounds =
+    playbackMode === 'normal'
+      ? activeVisualRounds.filter((round) => round.status === 'active')
+      : [];
 
   return (
     <div ref={frameRef} className="w-full min-w-0">
       <div className="mx-auto flex flex-col items-center" style={{ width: geometry.width }}>
         <PegGrid
           geometry={geometry}
-          lastResult={playbackMode === 'normal' ? lastResult : null}
+          rounds={animatingRounds}
           onAnimationComplete={completePlayback}
         />
         <MultiplierBar config={config} geometry={geometry} />

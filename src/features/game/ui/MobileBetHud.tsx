@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { clsx } from 'clsx';
 import { DollarSign } from 'lucide-react';
 import {
@@ -8,12 +9,20 @@ import {
   RISKS,
   type BetControlsModel,
 } from '../model/useBetControlsModel';
+import { MobileAutoSheet } from './MobileAutoSheet';
 
 interface MobileBetHudProps {
   model: BetControlsModel;
 }
 
 export function MobileBetHud({ model }: MobileBetHudProps) {
+  const [isAutoSheetOpen, setAutoSheetOpen] = useState(false);
+  const primaryLabel = model.isAutoActive
+    ? 'Stop'
+    : model.isPending
+      ? 'Placing'
+      : 'Bet';
+
   return (
     <section
       aria-label="Mobile bet controls"
@@ -47,17 +56,19 @@ export function MobileBetHud({ model }: MobileBetHudProps) {
 
         <button
           type="button"
-          onClick={model.handleBet}
-          disabled={model.isDisabled}
+          onClick={model.isAutoActive ? model.handleStopAuto : model.handleBet}
+          disabled={model.isAutoActive ? false : model.isBetDisabled}
           className={clsx(
             'mx-auto flex h-20 w-20 items-center justify-center rounded-full border text-sm font-black uppercase tracking-wide transition-all',
-            model.isDisabled
+            model.isAutoActive
+              ? 'border-red-300/50 bg-red-500 text-white shadow-[0_0_22px_rgba(239,68,68,0.24)] hover:bg-red-400 active:scale-[0.96]'
+              : model.isBetDisabled
               ? 'border-emerald-800/40 bg-neutral-900 text-emerald-800'
               : 'border-emerald-300/50 bg-emerald-500 text-neutral-950 shadow-[0_0_22px_rgba(52,211,153,0.24)] hover:bg-emerald-400 active:scale-[0.96]',
           )}
-          aria-label="Place bet"
+          aria-label={model.isAutoActive ? 'Stop Auto' : 'Place bet'}
         >
-          <span>{model.isPending ? 'Placing' : 'Bet'}</span>
+          <span>{primaryLabel}</span>
         </button>
 
         <div className="flex min-w-0 flex-col gap-1">
@@ -69,8 +80,14 @@ export function MobileBetHud({ model }: MobileBetHudProps) {
               <button
                 key={m}
                 type="button"
-                onClick={() => model.setMode(m)}
-                disabled={m === 'auto'}
+                onClick={() => {
+                  model.setMode(m);
+
+                  if (m === 'auto') {
+                    setAutoSheetOpen(true);
+                  }
+                }}
+                disabled={model.isAutoActive && m === 'manual'}
                 className={clsx(
                   'flex h-6 items-center justify-between rounded px-2 text-[10px] font-semibold capitalize transition-colors',
                   model.mode === m
@@ -80,7 +97,11 @@ export function MobileBetHud({ model }: MobileBetHudProps) {
                 )}
               >
                 <span>{m.charAt(0).toUpperCase() + m.slice(1)}</span>
-                {m === 'auto' && <span className="text-[9px] uppercase">Soon</span>}
+                {m === 'auto' && (
+                  <span className="text-[9px] uppercase">
+                    {model.isAutoActive ? model.autoProgressLabel : 'Set'}
+                  </span>
+                )}
               </button>
             ))}
           </div>
@@ -93,7 +114,7 @@ export function MobileBetHud({ model }: MobileBetHudProps) {
             key={m}
             type="button"
             onClick={() => model.setPlaybackMode(m)}
-            disabled={model.isDisabled}
+            disabled={model.areControlsDisabled}
             className={clsx(
               'h-7 rounded text-[10px] font-semibold capitalize transition-colors disabled:cursor-not-allowed disabled:opacity-45',
               model.playbackMode === m
@@ -155,6 +176,11 @@ export function MobileBetHud({ model }: MobileBetHudProps) {
           MAX
         </button>
       </div>
+      <MobileAutoSheet
+        model={model}
+        open={isAutoSheetOpen}
+        onOpenChange={setAutoSheetOpen}
+      />
     </section>
   );
 }

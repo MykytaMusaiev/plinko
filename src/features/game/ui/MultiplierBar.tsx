@@ -16,7 +16,7 @@ interface MultiplierBarProps {
 const COMPACT_BUCKET_LABEL_WIDTH = 20;
 
 export function MultiplierBar({ config, geometry }: MultiplierBarProps) {
-  const { risk, selectedRows, winningBucketIndex, betAmount } = useGameStore();
+  const { risk, selectedRows, latestReveal, betAmount } = useGameStore();
   const multipliers: number[] = config.payoutTables[risk]?.[String(selectedRows)] ?? [];
 
   return (
@@ -42,7 +42,7 @@ export function MultiplierBar({ config, geometry }: MultiplierBarProps) {
             `}
           </style>
           {multipliers.map((m, i) => {
-            const isWinner = winningBucketIndex === i;
+            const isWinner = latestReveal?.bucketIndex === i;
             const potentialPayout = formatCredits(String(BigInt(Math.round(Number(betAmount) * m))));
             const isDarkBucket = m < 0.5;
             const bucket = geometry.buckets[i];

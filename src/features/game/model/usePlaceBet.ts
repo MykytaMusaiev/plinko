@@ -1,6 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { betsApi } from "../api/bets.api";
 import { useGameStore } from "./game.store";
+import { useAuthStore } from "@/features/auth/model/auth.store";
 import type { CreateBetDto, BetResponse } from "@/shared/types/api.types";
 
 interface UsePlaceBetOptions {
@@ -8,16 +9,27 @@ interface UsePlaceBetOptions {
 }
 
 export function usePlaceBet({ onError }: UsePlaceBetOptions = {}) {
-    const { setPlaying, startRound } = useGameStore();
+    const user = useAuthStore((s) => s.user);
+    const setUser = useAuthStore((s) => s.setUser);
+    const { enqueueVisualRound, setBetRequestInFlight } = useGameStore();
 
     return useMutation<BetResponse, Error, CreateBetDto>({
         mutationFn: betsApi.place,
+        onMutate: () => {
+            setBetRequestInFlight(true);
+        },
         onSuccess: (result) => {
-            startRound(result);
+            enqueueVisualRound(result);
+
+            if (user) {
+                setUser({ ...user, balance: result.balanceAfter });
+            }
         },
         onError: (err) => {
-            setPlaying(false);
             onError?.(err);
+        },
+        onSettled: () => {
+            setBetRequestInFlight(false);
         },
     });
 }
