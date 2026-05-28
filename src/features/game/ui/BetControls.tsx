@@ -9,6 +9,7 @@ import {
   RISKS,
   type BetControlsModel,
 } from '../model/useBetControlsModel';
+import { AutoSettings } from './AutoSettings';
 
 interface BetControlsProps {
   model: BetControlsModel;
@@ -16,7 +17,7 @@ interface BetControlsProps {
 
 export function BetControls({ model }: BetControlsProps) {
   return (
-    <aside className="flex flex-col gap-5 w-55 shrink-0 p-4 bg-[#141924] border-r border-white/5 h-full">
+    <aside className="flex h-full w-55 shrink-0 flex-col gap-5 overflow-y-auto border-r border-white/5 bg-[#141924] p-4">
       {/* Mode tabs */}
       <div className="flex rounded-lg overflow-hidden bg-neutral-900 p-0.5 gap-0.5">
         {MODES.map((m) => (
@@ -24,12 +25,12 @@ export function BetControls({ model }: BetControlsProps) {
             key={m}
             type="button"
             onClick={() => model.setMode(m)}
-            disabled={m === 'auto'}
+            disabled={model.isAutoActive && m !== model.mode}
             className={clsx(
               'flex-1 py-1.5 text-xs font-medium rounded-md capitalize transition-colors',
               model.mode === m
                 ? 'bg-neutral-700 text-white'
-                : 'text-neutral-500 cursor-not-allowed',
+                : 'text-neutral-500 hover:text-neutral-300 disabled:cursor-not-allowed disabled:opacity-45',
             )}
           >
             {m.charAt(0).toUpperCase() + m.slice(1)}
@@ -45,7 +46,7 @@ export function BetControls({ model }: BetControlsProps) {
               key={m}
               type="button"
               onClick={() => model.setPlaybackMode(m)}
-              disabled={model.isDisabled}
+              disabled={model.areControlsDisabled}
               className={clsx(
                 'flex-1 py-1.5 text-xs font-medium rounded-md capitalize transition-colors disabled:cursor-not-allowed disabled:opacity-40',
                 model.playbackMode === m
@@ -154,35 +155,23 @@ export function BetControls({ model }: BetControlsProps) {
         </div>
       </div>
 
-      {/* Bet button */}
-      <button
-        type="button"
-        onClick={model.handleBet}
-        disabled={model.isDisabled}
-        className={clsx(
-          'mt-auto w-full py-3 rounded-xl font-bold text-sm tracking-wide transition-all',
-          model.isDisabled
-            ? 'bg-emerald-700/40 text-emerald-700 cursor-not-allowed'
-            : 'bg-emerald-500 hover:bg-emerald-400 text-neutral-900 active:scale-[0.97] shadow-[0_0_20px_rgba(52,211,153,0.3)]',
-        )}
-      >
-        {model.isPending ? 'Placing\u2026' : 'Bet'}
-      </button>
-
-      {/* Bottom icons */}
-      <div className="flex justify-between items-center pt-1">
-        <button className="text-neutral-600 hover:text-neutral-400 transition-colors" aria-label="Expand">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
-          </svg>
+      {model.mode === 'auto' ? (
+        <AutoSettings model={model} />
+      ) : (
+        <button
+          type="button"
+          onClick={model.handleBet}
+          disabled={model.isBetDisabled}
+          className={clsx(
+            'mt-auto w-full py-3 rounded-xl font-bold text-sm tracking-wide transition-all',
+            model.isBetDisabled
+              ? 'bg-emerald-700/40 text-emerald-700 cursor-not-allowed'
+              : 'bg-emerald-500 hover:bg-emerald-400 text-neutral-900 active:scale-[0.97] shadow-[0_0_20px_rgba(52,211,153,0.3)]',
+          )}
+        >
+          {model.isPending ? 'Placing\u2026' : 'Bet'}
         </button>
-        <button className="text-neutral-600 hover:text-neutral-400 transition-colors" aria-label="Settings">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <circle cx="12" cy="12" r="3" />
-            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
-          </svg>
-        </button>
-      </div>
+      )}
     </aside>
   );
 }

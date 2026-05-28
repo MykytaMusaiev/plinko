@@ -5,7 +5,13 @@ import { toast } from 'sonner';
 import { useAuthStore } from '@/features/auth/model/auth.store';
 import { formatCredits, parseCredits, MIN_BET, MAX_BET } from '@/shared/lib/bigint';
 import type { GameConfig, Risk } from '@/shared/types/api.types';
+import type {
+  AutoRuntime,
+  AutoSettings,
+} from './autoMode.types';
+import { getAutoStopReasonLabel } from './autoMode.utils';
 import { useGameStore, type GameMode, type PlaybackMode } from './game.store';
+import { useAutoMode } from './useAutoMode';
 import { usePlaceBet } from './usePlaceBet';
 
 export const RISKS: Risk[] = ['LOW', 'MEDIUM', 'HIGH'];
@@ -24,7 +30,15 @@ export interface BetControlsModel {
   rowMin: number;
   rowMax: number;
   isDisabled: boolean;
+  isBetDisabled: boolean;
+  areControlsDisabled: boolean;
   isPending: boolean;
+  isAutoActive: boolean;
+  isAutoSettingsLocked: boolean;
+  autoSettings: AutoSettings;
+  autoRuntime: AutoRuntime;
+  autoProgressLabel: string;
+  autoStopReasonLabel: string;
   setEditingAmount: (value: string) => void;
   handleAmountBlur: () => void;
   setToMin: () => void;
@@ -35,7 +49,12 @@ export interface BetControlsModel {
   setSelectedRows: (rows: number) => void;
   setMode: (mode: GameMode) => void;
   setPlaybackMode: (mode: PlaybackMode) => void;
+  setAutoNumberOfBets: (value: number) => void;
+  setAutoStopOnProfit: (value: string) => void;
+  setAutoStopOnLoss: (value: string) => void;
   handleBet: () => void;
+  handleStartAuto: () => Promise<boolean>;
+  handleStopAuto: () => void;
 }
 
 interface UseBetControlsModelInput {
@@ -51,12 +70,18 @@ export function useBetControlsModel({ config }: UseBetControlsModelInput): BetCo
     selectedRows,
     mode,
     playbackMode,
-    isPlaying,
+    isBetRequestInFlight,
+    activeVisualRounds,
+    autoSettings,
+    autoRuntime,
     setBetAmount,
     setRisk,
     setSelectedRows,
     setMode,
     setPlaybackMode,
+    setAutoNumberOfBets,
+    setAutoStopOnProfit,
+    setAutoStopOnLoss,
   } = useGameStore();
 
   const [editingAmount, setEditingAmount] = useState<string | null>(null);
@@ -64,6 +89,10 @@ export function useBetControlsModel({ config }: UseBetControlsModelInput): BetCo
 
   const { mutate, isPending } = usePlaceBet({
     onError: (err) => toast.error(err.message || 'Bet failed. Try again.'),
+  });
+  const { startAuto, stopAuto, isAutoActive } = useAutoMode({
+    config,
+    onError: (err) => toast.error(err.message || 'Auto mode stopped.'),
   });
 
   const configMax = config.maxBet ? BigInt(config.maxBet) : MAX_BET;
@@ -73,7 +102,16 @@ export function useBetControlsModel({ config }: UseBetControlsModelInput): BetCo
   const rowValues = config.rows;
   const rowMin = config.rows[0] ?? 8;
   const rowMax = config.rows[config.rows.length - 1] ?? 16;
-  const isDisabled = isPending || isPlaying;
+  const hasActiveVisualRounds = activeVisualRounds.length > 0;
+  const isBetDisabled = isBetRequestInFlight || isAutoActive;
+  const areControlsDisabled =
+    isBetRequestInFlight || hasActiveVisualRounds || isAutoActive;
+  const isDisabled = areControlsDisabled;
+  const isAutoSettingsLocked = isBetRequestInFlight || isAutoActive;
+  const autoTargetCount =
+    autoRuntime.targetCount > 0 ? autoRuntime.targetCount : autoSettings.numberOfBets;
+  const autoProgressLabel = `${autoRuntime.resolvedCount}/${autoTargetCount}`;
+  const autoStopReasonLabel = getAutoStopReasonLabel(autoRuntime.stopReason);
 
   const clamp = (value: bigint) =>
     value < configMin ? configMin : value > effectiveMax ? effectiveMax : value;
@@ -120,9 +158,28 @@ export function useBetControlsModel({ config }: UseBetControlsModelInput): BetCo
   };
 
   const handleBet = () => {
+    if (isBetDisabled || useGameStore.getState().isBetRequestInFlight) {
+      return;
+    }
+
     const amount = commitEditingAmount();
 
     mutate({ amount: Number(amount), rows: selectedRows, risk });
+  };
+
+  const handleStartAuto = async () => {
+    if (isAutoSettingsLocked) {
+      return false;
+    }
+
+    const amount = commitEditingAmount();
+    setMode('auto');
+
+    return startAuto({ amount, rows: selectedRows, risk });
+  };
+
+  const handleStopAuto = () => {
+    stopAuto();
   };
 
   return {
@@ -137,7 +194,15 @@ export function useBetControlsModel({ config }: UseBetControlsModelInput): BetCo
     rowMin,
     rowMax,
     isDisabled,
+    isBetDisabled,
+    areControlsDisabled,
     isPending,
+    isAutoActive,
+    isAutoSettingsLocked,
+    autoSettings,
+    autoRuntime,
+    autoProgressLabel,
+    autoStopReasonLabel,
     setEditingAmount,
     handleAmountBlur,
     setToMin,
@@ -148,6 +213,11 @@ export function useBetControlsModel({ config }: UseBetControlsModelInput): BetCo
     setSelectedRows,
     setMode,
     setPlaybackMode,
+    setAutoNumberOfBets,
+    setAutoStopOnProfit,
+    setAutoStopOnLoss,
     handleBet,
+    handleStartAuto,
+    handleStopAuto,
   };
 }
