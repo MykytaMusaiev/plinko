@@ -201,14 +201,14 @@ None.
 - `git diff --name-only`
 - `git ls-files --others --exclude-standard`
 - Correction commands:
-  - `rg -n "On Win|On Loss|onWin|onLoss|increase|reset|Adjustment|percent|AUTO_PERCENT|getNextAutoBetAmount|isWinningResult" src/features/game docs/modules/game.md .ai/tasks/active/auto-mode.md`
-  - `pnpm lint`
-  - `pnpm build`
-  - `git diff --check`
-  - `C:\Program Files\Git\bin\bash.exe -lc './scripts/check-docs-freshness.sh'`
-  - `C:\Program Files\Git\bin\bash.exe -lc './scripts/check-api-boundary.sh'`
-  - `C:\Program Files\Git\bin\bash.exe -lc './scripts/validate.sh'`
-  - Browser QA for desktop Auto tab, mobile Auto sheet, Auto run/progress, and manual repeat betting.
+    - `rg -n "On Win|On Loss|onWin|onLoss|increase|reset|Adjustment|percent|AUTO_PERCENT|getNextAutoBetAmount|isWinningResult" src/features/game docs/modules/game.md .ai/tasks/active/auto-mode.md`
+    - `pnpm lint`
+    - `pnpm build`
+    - `git diff --check`
+    - `C:\Program Files\Git\bin\bash.exe -lc './scripts/check-docs-freshness.sh'`
+    - `C:\Program Files\Git\bin\bash.exe -lc './scripts/check-api-boundary.sh'`
+    - `C:\Program Files\Git\bin\bash.exe -lc './scripts/validate.sh'`
+    - Browser QA for desktop Auto tab, mobile Auto sheet, Auto run/progress, and manual repeat betting.
 
 ## Validation results
 
@@ -220,13 +220,13 @@ None.
 - PASS: Git Bash aggregate `scripts/validate.sh` via `bash.exe -lc`
 - Initial WSL `bash` and non-login Git Bash attempts were invalid environment invocations, not source failures.
 - Correction validation also passed:
-  - PASS: `pnpm lint`
-  - PASS: `pnpm build`
-  - PASS: `git diff --check`
-  - PASS: Git Bash docs freshness via `bash.exe -lc`
-  - PASS: Git Bash API boundary check via `bash.exe -lc`
-  - PASS: Git Bash aggregate `scripts/validate.sh` via `bash.exe -lc`
-  - PASS: source/docs scan found no remaining On Win / On Loss adjustment code paths.
+    - PASS: `pnpm lint`
+    - PASS: `pnpm build`
+    - PASS: `git diff --check`
+    - PASS: Git Bash docs freshness via `bash.exe -lc`
+    - PASS: Git Bash API boundary check via `bash.exe -lc`
+    - PASS: Git Bash aggregate `scripts/validate.sh` via `bash.exe -lc`
+    - PASS: source/docs scan found no remaining On Win / On Loss adjustment code paths.
 
 ## UI QA requirement
 
@@ -250,13 +250,13 @@ Required. This task changes visible UI, layout, responsive behavior, animation b
 - PASS: Mobile `documentElement.scrollWidth` equaled viewport width `390`; no obvious horizontal overflow.
 - PASS: Header and bottom navigation remained visible and did not block game controls in the smoke pass.
 - Correction QA:
-  - PASS: Desktop Auto tab no longer shows On Win / On Loss sections.
-  - PASS: Mobile Auto sheet no longer shows On Win / On Loss sections.
-  - PASS: Desktop Auto tab and mobile Auto sheet no longer show a visible stop reason/status field such as `Completed` or `Stopped`.
-  - PASS: Auto still starts, shows progress, and completes/stops while using the fixed current bet amount.
-  - PASS: Start / Stop / progress still work.
-  - PASS: Manual repeated betting still allowed a second BET after backend response while visual rounds continued.
-  - PARTIAL: Stop on Profit / Stop on Loss fields remained visible and their code path is preserved, but editing those text fields through the in-app browser was blocked by the browser virtual clipboard/type interaction.
+    - PASS: Desktop Auto tab no longer shows On Win / On Loss sections.
+    - PASS: Mobile Auto sheet no longer shows On Win / On Loss sections.
+    - PASS: Desktop Auto tab and mobile Auto sheet no longer show a visible stop reason/status field such as `Completed` or `Stopped`.
+    - PASS: Auto still starts, shows progress, and completes/stops while using the fixed current bet amount.
+    - PASS: Start / Stop / progress still work.
+    - PASS: Manual repeated betting still allowed a second BET after backend response while visual rounds continued.
+    - PARTIAL: Stop on Profit / Stop on Loss fields remained visible and their code path is preserved, but editing those text fields through the in-app browser was blocked by the browser virtual clipboard/type interaction.
 
 ## Sandbox / tooling blockers
 
@@ -298,3 +298,11 @@ Not applicable.
 ## Handoff / next step
 
 Implement scoped Auto Mode changes, update docs, then validate.
+
+## Final Lifecycle Closure
+
+- PR merged into `feat/plinko`.
+- Remote task branch deleted.
+- Local base branch pulled after merge.
+- Active task artifact archived.
+- Product implementation commit is complete.
