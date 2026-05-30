@@ -291,3 +291,11 @@ Required. This task changes visible animation behavior and high-frequency intera
 
 - Keep artifact active until implementation, validation, UI QA, and handoff are complete.
 - Dev server is not currently running. Detached Windows `Start-Process` attempts exited in this sandbox, but foreground `pnpm dev -- --port 3000` reached Ready.
+
+## Final Lifecycle Closure
+
+- PR #12 merged into `feat/plinko`.
+- Remote task branch deleted.
+- Local base branch pulled after merge.
+- Active task artifact archived from `.ai/tasks/active/plinko-renderer-rebuild.md` to `.ai/tasks/archived/plinko-renderer-rebuild.md`.
+- Deterministic Plinko renderer rebuild accepted as MVP-sufficient after manual QA.
