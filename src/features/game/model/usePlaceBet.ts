@@ -19,7 +19,7 @@ export function usePlaceBet({ onError }: UsePlaceBetOptions = {}) {
             setBetRequestInFlight(true);
         },
         onSuccess: (result) => {
-            enqueueVisualRound(result);
+            enqueueVisualRound(result, "manual");
 
             if (user) {
                 setUser({ ...user, balance: result.balanceAfter });

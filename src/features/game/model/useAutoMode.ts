@@ -3,6 +3,7 @@ import { useMutation } from "@tanstack/react-query";
 import { betsApi } from "../api/bets.api";
 import { useAuthStore } from "@/features/auth/model/auth.store";
 import type { BetResponse, CreateBetDto, GameConfig } from "@/shared/types/api.types";
+import { getAutoRequestPaceMs } from "../lib/visualPlaybackPolicy";
 import {
     clampBetAmount,
     getAutoStopReason,
@@ -14,6 +15,16 @@ import type { AutoStartInput } from "./autoMode.types";
 interface UseAutoModeInput {
     config: GameConfig;
     onError?: (err: Error) => void;
+}
+
+function wait(ms: number): Promise<void> {
+    if (ms <= 0) {
+        return Promise.resolve();
+    }
+
+    return new Promise((resolve) => {
+        window.setTimeout(resolve, ms);
+    });
 }
 
 export function useAutoMode({ config, onError }: UseAutoModeInput) {
@@ -134,7 +145,7 @@ export function useAutoMode({ config, onError }: UseAutoModeInput) {
 
                         const latestUser = useAuthStore.getState().user;
 
-                        state.enqueueVisualRound(result);
+                        state.enqueueVisualRound(result, "auto");
                         if (latestUser) {
                             setUser({ ...latestUser, balance: result.balanceAfter });
                         }
@@ -167,7 +178,7 @@ export function useAutoMode({ config, onError }: UseAutoModeInput) {
                         currentBetAmount = baseBetAmount;
                         nextState.setAutoCurrentBetAmount(currentBetAmount);
 
-                        await Promise.resolve();
+                        await wait(getAutoRequestPaceMs(nextState.playbackMode));
                     }
                 } catch (err) {
                     const error = err instanceof Error ? err : new Error("Auto bet failed");
