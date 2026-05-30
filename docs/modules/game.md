@@ -11,8 +11,9 @@ Implemented:
 - Manual game flow is implemented in `src/features/game`.
 - Game state is stored in Zustand through `useGameStore`.
 - Current state includes game mode, playback mode, backend request in-flight
-  state, keyed active visual rounds, latest reveal identity, recent results,
-  Auto settings/runtime state, bet amount, risk, and selected rows.
+  state, keyed active visual rounds with source and visual playback style,
+  latest reveal identity, recent results, Auto settings/runtime state, bet
+  amount, risk, and selected rows.
 - Game config is loaded from local `/api/game/config` with TanStack Query.
 - `/api/game/config` proxies to backend `/api/v1/game/config` without auth.
 - `useBetControlsModel` owns shared betting control behavior for manual bet
@@ -46,9 +47,10 @@ Implemented:
   and amount controls remain locked while visual rounds are active so active
   board geometry and displayed multipliers do not shift underneath existing
   animations.
-- Auto mode submits backend bet requests sequentially. The next Auto request is
-  scheduled after the previous backend response returns and does not wait for
-  the previous visual animation to finish.
+- Auto mode submits backend bet requests sequentially. In Normal playback, the
+  next Auto request is paced by a short visual delay after the previous backend
+  response so Auto reads as a sequence of visible Plinko drops. In Fast
+  playback, Auto remains backend-paced and quick.
 - Auto mode stores settings for finite number of bets, stop on profit, and stop
   on loss. Runtime state tracks status, requested/resolved progress, target
   count, started balance, current bet amount, final stop reason, and last error.
@@ -84,17 +86,31 @@ Implemented:
   can use larger peg spacing when the container has room, while 16 rows keep the
   dense baseline spacing. The same geometry model is used on desktop and
   mobile; surrounding layout constraints provide the available board size.
+- The geometry model owns final peg row to bucket row spacing, so bucket
+  placement and final landing targets stay aligned when that clearance changes.
 - `GameBoard` passes active visual rounds to `PegGrid` only for normal playback.
 - In fast playback, `GameBoard` completes active visual rounds immediately so
   Fast remains a no-animation result path.
-- `PegGrid` builds normal playback waypoints from backend-provided
-  `BetResponse.path` through geometry-owned lane/path slots for each active
-  visual round. Each path step passes near the relevant visual boundary peg so
-  the motion reads as a peg deflection, then uses the feature-local board
-  geometry landing target for backend-provided `bucketIndex` as the explicit
-  final bucket-drop waypoint.
+- Normal playback uses a feature-local deterministic renderer layer. Backend
+  `BetResponse.path` and `bucketIndex` are converted once per active visual
+  full-drop visual round into a visual animation plan with waypoints, duration,
+  optional contact pulses, and settle fallback timing.
+- The static peg layer is separated from ball runtime animation. `PegGrid`
+  composes a mostly static `PegLayer` with `PlinkoBallLayer`, while ball
+  movement uses precomputed transform keyframes instead of per-waypoint React
+  state updates.
+- Full visual drops traverse geometry-owned lane/path slots, pass near the
+  relevant visual boundary peg for subtle contact feedback, and always use the
+  feature-local board geometry landing target for backend-provided
+  `bucketIndex` as the explicit final bucket-drop waypoint.
+- Auto visual playback uses a density policy: Manual rounds always receive full
+  drops, while Auto rounds receive full drops only while the active full-Auto
+  budget has capacity. Overflow Auto results skip ball travel and resolve
+  through the keyed bucket reveal/highlight path so dense runs stay honest
+  without showing vertical fallback drops or overloading the renderer.
 - `PegGrid` renders multiple active balls by keying each animation with the
-  visual round's `roundId`.
+  visual round's `roundId`; completed rounds still reveal and prune through the
+  shared keyed lifecycle.
 - Displayed balance updates when the backend response returns, not when visual
   playback completes.
 - Winning bucket highlight is visual feedback only. Highlight cleanup uses the

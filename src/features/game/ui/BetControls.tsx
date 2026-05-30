@@ -163,7 +163,7 @@ export function BetControls({ model }: BetControlsProps) {
           onClick={model.handleBet}
           disabled={model.isBetDisabled}
           className={clsx(
-            'mt-auto w-full py-3 rounded-xl font-bold text-sm tracking-wide transition-all',
+            'w-full py-3 rounded-xl font-bold text-sm tracking-wide transition-all',
             model.isBetDisabled
               ? 'bg-emerald-700/40 text-emerald-700 cursor-not-allowed'
               : 'bg-emerald-500 hover:bg-emerald-400 text-neutral-900 active:scale-[0.97] shadow-[0_0_20px_rgba(52,211,153,0.3)]',

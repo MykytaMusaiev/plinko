@@ -1,6 +1,11 @@
 import { create } from "zustand";
 import type { BetResponse, Risk } from "@/shared/types/api.types";
 import { MIN_BET } from "@/shared/lib/bigint";
+import {
+    selectVisualPlaybackStyle,
+    type VisualPlaybackStyle,
+    type VisualRoundSource,
+} from "../lib/visualPlaybackPolicy";
 import { clampAutoBetCount } from "./autoMode.utils";
 import type {
     AutoRuntime,
@@ -16,6 +21,8 @@ export type VisualRoundStatus = "active" | "revealed";
 export interface VisualRound {
     roundId: string;
     result: BetResponse;
+    source: VisualRoundSource;
+    playbackStyle: VisualPlaybackStyle;
     status: VisualRoundStatus;
     createdAt: number;
     completedAt: number | null;
@@ -45,7 +52,7 @@ interface GameState {
     setMode: (mode: GameMode) => void;
     setPlaybackMode: (mode: PlaybackMode) => void;
     setBetRequestInFlight: (value: boolean) => void;
-    enqueueVisualRound: (result: BetResponse) => VisualRound;
+    enqueueVisualRound: (result: BetResponse, source: VisualRoundSource) => VisualRound;
     completeVisualRound: (roundId: string) => boolean;
     pruneVisualRound: (roundId: string) => void;
     clearReveal: (roundId: string) => void;
@@ -106,10 +113,23 @@ export const useGameStore = create<GameState>((set, get) => ({
     setMode: (mode) => set({ mode }),
     setPlaybackMode: (playbackMode) => set({ playbackMode }),
     setBetRequestInFlight: (isBetRequestInFlight) => set({ isBetRequestInFlight }),
-    enqueueVisualRound: (result) => {
+    enqueueVisualRound: (result, source) => {
+        const state = get();
+        const activeFullAutoRounds = state.activeVisualRounds.filter(
+            (round) =>
+                round.status === "active" &&
+                round.source === "auto" &&
+                round.playbackStyle === "full",
+        ).length;
+        const playbackStyle = selectVisualPlaybackStyle({
+            source,
+            activeFullAutoRounds,
+        });
         const round: VisualRound = {
             roundId: `${result.betId}-${Date.now()}-${Math.random().toString(36).slice(2)}`,
             result,
+            source,
+            playbackStyle,
             status: "active",
             createdAt: Date.now(),
             completedAt: null,
