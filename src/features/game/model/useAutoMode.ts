@@ -10,7 +10,8 @@ import {
     parseOptionalCreditInput,
 } from "./autoMode.utils";
 import { useGameStore } from "./game.store";
-import type { AutoStartInput } from "./autoMode.types";
+import type { AutoStartInput, AutoStopReason } from "./autoMode.types";
+import { useGameAudio } from "./useGameAudio";
 
 interface UseAutoModeInput {
     config: GameConfig;
@@ -30,14 +31,32 @@ function wait(ms: number): Promise<void> {
 export function useAutoMode({ config, onError }: UseAutoModeInput) {
     const loopActiveRef = useRef(false);
     const stopRequestedRef = useRef(false);
+    const autoStopSoundPlayedRef = useRef(false);
     const setUser = useAuthStore((s) => s.setUser);
     const autoRuntime = useGameStore((s) => s.autoRuntime);
+    const { playSound } = useGameAudio();
     const mutation = useMutation<BetResponse, Error, CreateBetDto>({
         mutationFn: betsApi.place,
     });
 
     const configMin = config.minBet ? BigInt(config.minBet) : 0n;
     const configMax = config.maxBet ? BigInt(config.maxBet) : null;
+
+    const finishAutoRunWithSound = useCallback(
+        (
+            state: ReturnType<typeof useGameStore.getState>,
+            reason: AutoStopReason,
+            lastError?: string | null,
+        ) => {
+            state.finishAutoRun(reason, lastError);
+
+            if (!autoStopSoundPlayedRef.current) {
+                playSound("auto-stop");
+                autoStopSoundPlayedRef.current = true;
+            }
+        },
+        [playSound],
+    );
 
     const stopAuto = useCallback(() => {
         stopRequestedRef.current = true;
@@ -53,8 +72,8 @@ export function useAutoMode({ config, onError }: UseAutoModeInput) {
             return;
         }
 
-        state.finishAutoRun("stopped_by_user");
-    }, []);
+        finishAutoRunWithSound(state, "stopped_by_user");
+    }, [finishAutoRunWithSound]);
 
     const startAuto = useCallback(
         ({ amount, rows, risk }: AutoStartInput): boolean => {
@@ -97,6 +116,8 @@ export function useAutoMode({ config, onError }: UseAutoModeInput) {
 
             loopActiveRef.current = true;
             stopRequestedRef.current = false;
+            autoStopSoundPlayedRef.current = false;
+            playSound("auto-start");
             let currentBetAmount = baseBetAmount;
 
             const runAutoLoop = async () => {
@@ -109,12 +130,12 @@ export function useAutoMode({ config, onError }: UseAutoModeInput) {
                             stopRequestedRef.current ||
                             runtime.status === "stopping"
                         ) {
-                            state.finishAutoRun("stopped_by_user");
+                            finishAutoRunWithSound(state, "stopped_by_user");
                             break;
                         }
 
                         if (runtime.resolvedCount >= runtime.targetCount) {
-                            state.finishAutoRun("completed");
+                            finishAutoRunWithSound(state, "completed");
                             break;
                         }
 
@@ -124,7 +145,7 @@ export function useAutoMode({ config, onError }: UseAutoModeInput) {
                         );
 
                         if (currentBetAmount > currentBalance) {
-                            state.finishAutoRun("insufficient_balance");
+                            finishAutoRunWithSound(state, "insufficient_balance");
                             break;
                         }
 
@@ -161,17 +182,17 @@ export function useAutoMode({ config, onError }: UseAutoModeInput) {
                         });
 
                         if (stopReason) {
-                            nextState.finishAutoRun(stopReason);
+                            finishAutoRunWithSound(nextState, stopReason);
                             break;
                         }
 
                         if (stopRequestedRef.current) {
-                            nextState.finishAutoRun("stopped_by_user");
+                            finishAutoRunWithSound(nextState, "stopped_by_user");
                             break;
                         }
 
                         if (resolvedCount >= nextState.autoRuntime.targetCount) {
-                            nextState.finishAutoRun("completed");
+                            finishAutoRunWithSound(nextState, "completed");
                             break;
                         }
 
@@ -182,7 +203,11 @@ export function useAutoMode({ config, onError }: UseAutoModeInput) {
                     }
                 } catch (err) {
                     const error = err instanceof Error ? err : new Error("Auto bet failed");
-                    useGameStore.getState().finishAutoRun("request_error", error.message);
+                    finishAutoRunWithSound(
+                        useGameStore.getState(),
+                        "request_error",
+                        error.message,
+                    );
                     onError?.(error);
                 } finally {
                     loopActiveRef.current = false;
@@ -195,7 +220,7 @@ export function useAutoMode({ config, onError }: UseAutoModeInput) {
 
             return true;
         },
-        [configMax, configMin, mutation, onError, setUser],
+        [configMax, configMin, finishAutoRunWithSound, mutation, onError, playSound, setUser],
     );
 
     useEffect(() => {

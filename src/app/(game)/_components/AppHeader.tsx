@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { clsx } from "clsx";
 import { Logout } from "@/features/auth/ui/Logout";
 import { useAuthStore } from "@/features/auth/model/auth.store";
+import { AudioToggle } from "@/features/game/ui/AudioToggle";
 import { formatCredits } from "@/shared/lib/bigint";
 
 export function AppHeader() {
@@ -43,6 +44,7 @@ export function AppHeader() {
             </div>
 
             <div className="flex items-center gap-3">
+                <AudioToggle />
                 <Logout />
             </div>
         </header>
