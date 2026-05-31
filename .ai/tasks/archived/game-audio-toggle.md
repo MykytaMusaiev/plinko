@@ -280,3 +280,16 @@ evidence level. User can manually verify the protected header after logging in;
 - Validation had passed before merge: focused audio policy tests, lint, build, API boundary check, docs freshness check, and `git diff --check`.
 - Required sound assets were included in the merged PR under `public/sounds/*.mp3`.
 - No peg/contact sound remains intentional MVP behavior, not a missing asset or lifecycle gap.
+
+## Post-lifecycle handoff update
+
+- Audio Design + AudioToggle is completed, merged, and lifecycle closed.
+- PR #13 merged the Howler-based feature-local audio layer, persisted mute state,
+  protected-header `AudioToggle`, bundled `public/sounds/*.mp3` assets, and
+  restrained Manual/Auto/Fast audio event policy into `feat/plinko`.
+- The task artifact is archived at `.ai/tasks/archived/game-audio-toggle.md`.
+- README/showcase documentation is tracked as the current docs follow-up in
+  `.ai/tasks/active/readme-showcase-docs.md`.
+- No peg/contact sound remains an intentional MVP decision to avoid audio spam.
+- Deferred work remains deferred: Playwright UI QA baseline, further renderer
+  polish, Bootstrap Kit, and CI/testing enhancements.
