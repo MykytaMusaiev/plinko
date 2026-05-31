@@ -257,11 +257,12 @@ Browser autoplay constraints, accidental Auto audio spam, and header wrapping on
 
 ## Artifact status / archival status
 
-Active; do not archive during this task.
+Archived after PR merge and user-requested lifecycle close.
 
 ## Archive commit verification
 
-Not applicable.
+Archive move is not committed yet. No staging or commit was performed during
+lifecycle close per user instruction.
 
 ## Handoff / next step
 
@@ -269,3 +270,13 @@ User must include the nine required `public/sounds/*.mp3` files when manually
 staging/committing. After that, the review blocker is resolved at repository
 evidence level. User can manually verify the protected header after logging in;
 `AudioToggle` should appear immediately to the left of `Logout`.
+
+## Lifecycle close evidence
+
+- PR merged into `feat/plinko`: merge commit `7fb8076` (`Merge pull request #13 from MykytaMusaiev/codex-game-audio-toggle`).
+- Task branch commit `4ab5c4e` is an ancestor of `feat/plinko`.
+- Remote task branch `origin/codex-game-audio-toggle` was deleted manually and was absent after `git fetch --prune`.
+- Local `feat/plinko` was fast-forwarded from `9abf281` to `7fb8076`.
+- Validation had passed before merge: focused audio policy tests, lint, build, API boundary check, docs freshness check, and `git diff --check`.
+- Required sound assets were included in the merged PR under `public/sounds/*.mp3`.
+- No peg/contact sound remains intentional MVP behavior, not a missing asset or lifecycle gap.
