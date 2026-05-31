@@ -33,6 +33,18 @@ Implemented:
   closes after Auto starts.
 - `AutoSettings` contains the shared Auto settings UI for desktop inline
   controls and the mobile bottom sheet.
+- `AudioToggle` is a compact icon-only control rendered in the protected app
+  header next to logout. It uses the Game feature audio state so the header
+  placement stays consistent across desktop and mobile without moving the sound
+  logic into the app shell.
+- Gameplay audio is implemented as a feature-local client-only layer under
+  `src/features/game`. The layer hides Howler usage behind Game audio helpers,
+  persists only the muted preference in browser `localStorage`, and does not
+  persist runtime playback or unlock state.
+- Howler is used for short game sound effects because it provides a small
+  browser audio abstraction with global mute and mobile/browser unlock handling.
+  The implementation does not add `react-howler`, audio sprites, an advanced
+  mixer, music, or volume controls.
 - Manual bet submission is built from the shared model's current amount, rows,
   and risk, then calls `usePlaceBet`.
 - `usePlaceBet` calls `betsApi.place`, which posts to local `/api/bets`.
@@ -40,6 +52,10 @@ Implemented:
   response returns, the result is added to recent results, a keyed visual round
   is enqueued, and the displayed balance updates from backend-provided
   `balanceAfter`.
+- Manual audio plays a short bet-start sound when a bet request starts. Normal
+  playback plays one drop sound as the visual round begins and exactly one
+  result sound when the keyed visual round completes. Fast playback skips
+  animation audio and plays only the bet-start plus one result sound.
 - Backend bet request readiness is separate from visual animation readiness.
   Only one backend bet request is allowed in flight at a time, but visual rounds
   may continue animating after the request has resolved.
@@ -51,6 +67,10 @@ Implemented:
   next Auto request is paced by a short visual delay after the previous backend
   response so Auto reads as a sequence of visible Plinko drops. In Fast
   playback, Auto remains backend-paced and quick.
+- Auto audio plays start and stop sounds once per run. Routine Auto result audio
+  is throttled so Normal and Fast runs do not produce repetitive sound spam;
+  Fast suppresses most routine result audio. High-win result sounds are allowed
+  through a separate cooldown.
 - Auto mode stores settings for finite number of bets, stop on profit, and stop
   on loss. Runtime state tracks status, requested/resolved progress, target
   count, started balance, current bet amount, final stop reason, and last error.
@@ -117,6 +137,9 @@ Implemented:
   completed visual round's `roundId` so an older cleanup timer cannot clear a
   newer result reveal, and request readiness does not wait for highlight
   cleanup.
+- Result audio uses existing `BetResponse` fields. Loss/win is derived from
+  `payout` compared with `amount`, and high-win audio is derived from a high
+  multiplier threshold.
 - `MultiplierBar` reads the latest reveal from game state to show the winning
   bucket highlight and renders bucket labels as the attached board bucket row.
 - Balance and logout access are owned by the protected `(game)` app shell so

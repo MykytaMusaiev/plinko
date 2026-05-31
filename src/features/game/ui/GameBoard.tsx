@@ -7,6 +7,7 @@ import { MultiplierBar } from './MultiplierBar';
 import { PegGrid } from './PegGrid';
 import type { GameConfig } from '@/shared/types/api.types';
 import type { VisualRound } from '../model/game.store';
+import { useGameAudio } from '../model/useGameAudio';
 
 interface GameBoardProps {
   config: GameConfig;
@@ -19,9 +20,11 @@ export function GameBoard({ config }: GameBoardProps) {
     selectedRows,
     playbackMode,
     activeVisualRounds,
+    autoRuntime,
     completeVisualRound,
     pruneVisualRound,
   } = useGameStore();
+  const { playResultSound } = useGameAudio();
   const frameRef = useRef<HTMLDivElement>(null);
   const [availableSize, setAvailableSize] = useState({ width: 0, height: 0 });
 
@@ -66,9 +69,16 @@ export function GameBoard({ config }: GameBoardProps) {
 
       if (!didComplete) return;
 
+      playResultSound({
+        source: round.source,
+        playbackMode,
+        result: round.result,
+        resolvedCount: autoRuntime.resolvedCount,
+      });
+
       window.setTimeout(() => pruneVisualRound(round.roundId), REVEAL_MS);
     },
-    [completeVisualRound, pruneVisualRound],
+    [autoRuntime.resolvedCount, completeVisualRound, playbackMode, playResultSound, pruneVisualRound],
   );
 
   useEffect(() => {
