@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo } from 'react';
 import { REVEAL_MS, useGameStore } from '../model/game.store';
 import { getCanvasRoundPlayback } from '../lib/canvasRoundPlaybackPolicy';
 import { PlinkoCanvasStage } from './PlinkoCanvasStage';
+import { RecentResults } from './RecentResults';
 import type { GameConfig } from '@/shared/types/api.types';
 import type { VisualRound } from '../model/game.store';
 import { useGameAudio } from '../model/useGameAudio';
@@ -93,7 +94,7 @@ export function GameBoard({ config }: GameBoardProps) {
   });
 
   return (
-    <div className="flex h-full min-h-[19rem] w-full min-w-0 flex-1 items-stretch">
+    <div className="relative flex h-full min-h-[19rem] w-full min-w-0 flex-1 items-stretch">
       <PlinkoCanvasStage
         bucketFeedbackRounds={bucketFeedbackRounds}
         bucketMultipliers={bucketMultipliers}
@@ -102,6 +103,7 @@ export function GameBoard({ config }: GameBoardProps) {
         rounds={animatingRounds}
         onAnimationComplete={completePlayback}
       />
+      <RecentResults />
     </div>
   );
 }

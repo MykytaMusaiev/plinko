@@ -4,7 +4,7 @@ import {
   type BucketFeedbacks,
   type PegFeedbacks,
 } from './feedback';
-import { getCanvasBucketStyle } from './bucket-style';
+import { getCanvasBucketStyle, toHexColor } from './bucket-style';
 import {
   PLINKO_SOURCE_HEIGHT,
   PLINKO_SOURCE_WIDTH,
@@ -129,9 +129,9 @@ function drawBucket(
   context.translate(-bucket.centerX, -centerY);
 
   const fill = context.createLinearGradient(bucket.x, bucket.y, bucket.x, bucket.y + bucket.height);
-  fill.addColorStop(0, toHex(style.highlightColor));
-  fill.addColorStop(0.5, toHex(style.midColor));
-  fill.addColorStop(1, toHex(style.darkColor));
+  fill.addColorStop(0, toHexColor(style.highlightColor));
+  fill.addColorStop(0.5, toHexColor(style.midColor));
+  fill.addColorStop(1, toHexColor(style.darkColor));
   context.fillStyle = fill;
   roundRect(context, bucket.x, bucket.y, bucket.width, bucket.height, bucket.radius);
   context.fill();
@@ -167,8 +167,4 @@ function roundRect(
 
 function formatMultiplier(value: number) {
   return `${Number.isInteger(value) ? value.toFixed(0) : String(value)}x`;
-}
-
-function toHex(value: number) {
-  return `#${value.toString(16).padStart(6, '0')}`;
 }

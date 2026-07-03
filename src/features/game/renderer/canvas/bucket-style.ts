@@ -1,10 +1,17 @@
 type BucketTone = 'amberOrange' | 'deepOrange' | 'green' | 'red' | 'yellow';
 
-interface BucketVisualStyle {
+export interface BucketVisualStyle {
   darkColor: number;
   highlightColor: number;
   labelColor: string;
   midColor: number;
+}
+
+export interface BucketDomStyle {
+  background: string;
+  borderColor: string;
+  color: string;
+  shadowColor: string;
 }
 
 const BUCKET_STYLES: Record<BucketTone, BucketVisualStyle> = {
@@ -47,6 +54,21 @@ export function getCanvasBucketStyle(
   return BUCKET_STYLES[getBucketTone(bucketIndex, bucketCount)];
 }
 
+export function getCanvasBucketDomStyle(
+  bucketIndex: number,
+  bucketCount: number,
+): BucketDomStyle {
+  const style = getCanvasBucketStyle(bucketIndex, bucketCount);
+  const highlight = toHexColor(style.highlightColor);
+
+  return {
+    background: `linear-gradient(180deg, ${highlight} 0%, ${toHexColor(style.midColor)} 50%, ${toHexColor(style.darkColor)} 100%)`,
+    borderColor: highlight,
+    color: style.labelColor,
+    shadowColor: toRgba(style.highlightColor, 0.22),
+  };
+}
+
 function getBucketTone(bucketIndex: number, bucketCount: number): BucketTone {
   const maxDistance = (bucketCount - 1) / 2;
   const distanceFromCenter = Math.abs(bucketIndex - maxDistance);
@@ -70,4 +92,16 @@ function getBucketTone(bucketIndex: number, bucketCount: number): BucketTone {
   }
 
   return 'yellow';
+}
+
+export function toHexColor(value: number) {
+  return `#${value.toString(16).padStart(6, '0')}`;
+}
+
+function toRgba(value: number, alpha: number) {
+  const red = (value >> 16) & 255;
+  const green = (value >> 8) & 255;
+  const blue = value & 255;
+
+  return `rgba(${red}, ${green}, ${blue}, ${alpha})`;
 }

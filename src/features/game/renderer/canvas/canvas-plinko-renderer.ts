@@ -79,6 +79,7 @@ export function createCanvasPlinkoRenderer({
   const activePlaybacks = new Map<string, ActiveCanvasPlayback>();
   const playbackContexts = new Map<string, PlaybackContext>();
   const bucketFeedbacks: BucketFeedbacks = new Map();
+  const bucketSettlementTimers = new Map<string, number>();
   const pegFeedbacks: PegFeedbacks = new Map();
   const preloadedRows = new Set<number>();
 
@@ -402,8 +403,18 @@ export function createCanvasPlinkoRenderer({
     emitPlaybackLifecycle(playback, 'started');
     triggerBucketFeedback(bucketFeedbacks, round.result.bucketIndex, now);
     ensureAnimationFrame();
-    emitPlaybackLifecycle(playback, 'completed', { terminal: true });
-    options.onRoundSettled?.(round, 'visual');
+
+    const timer = (container.ownerDocument.defaultView ?? window).setTimeout(() => {
+      bucketSettlementTimers.delete(round.id);
+
+      if (destroyed) {
+        return;
+      }
+
+      emitPlaybackLifecycle(playback, 'completed', { terminal: true });
+      options.onRoundSettled?.(round, 'visual');
+    }, PLINKO_BUCKET_FEEDBACK_DURATION_MS);
+    bucketSettlementTimers.set(round.id, timer);
 
     return {
       playbackId: playback.playbackId,
@@ -428,6 +439,10 @@ export function createCanvasPlinkoRenderer({
       animationFrame = null;
       activePlaybacks.clear();
       playbackContexts.clear();
+      for (const timer of bucketSettlementTimers.values()) {
+        (container.ownerDocument.defaultView ?? window).clearTimeout(timer);
+      }
+      bucketSettlementTimers.clear();
       bucketFeedbacks.clear();
       pegFeedbacks.clear();
       canvas.remove();

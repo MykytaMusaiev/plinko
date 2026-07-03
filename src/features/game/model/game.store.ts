@@ -7,6 +7,11 @@ import {
     type VisualRoundSource,
 } from "../lib/visualPlaybackPolicy";
 import { clampAutoBetCount } from "./autoMode.utils";
+import {
+    addPlinkoStoryEntry,
+    createPlinkoStoryEntry,
+    type PlinkoStoryEntry,
+} from "./resultFeedback.model";
 import type {
     AutoRuntime,
     AutoSettings,
@@ -41,6 +46,8 @@ interface GameState {
     activeVisualRounds: VisualRound[];
     latestReveal: VisualReveal | null;
     recentResults: BetResponse[];
+    storyEntries: PlinkoStoryEntry[];
+    latestResultFeedback: PlinkoStoryEntry | null;
     autoSettings: AutoSettings;
     autoRuntime: AutoRuntime;
 
@@ -103,6 +110,8 @@ export const useGameStore = create<GameState>((set, get) => ({
     activeVisualRounds: [],
     latestReveal: null,
     recentResults: [],
+    storyEntries: [],
+    latestResultFeedback: null,
     autoSettings: DEFAULT_AUTO_SETTINGS,
     autoRuntime: DEFAULT_AUTO_RUNTIME,
 
@@ -137,7 +146,6 @@ export const useGameStore = create<GameState>((set, get) => ({
 
         set((s) => ({
             activeVisualRounds: [...s.activeVisualRounds, round],
-            recentResults: [result, ...s.recentResults].slice(0, MAX_RECENT),
         }));
 
         return round;
@@ -150,10 +158,17 @@ export const useGameStore = create<GameState>((set, get) => ({
             return false;
         }
 
+        const completedAt = Date.now();
+        const storyEntry = createPlinkoStoryEntry({
+            completedAt,
+            result: round.result,
+            roundId,
+        });
+
         set((s) => ({
             activeVisualRounds: s.activeVisualRounds.map((item) =>
                 item.roundId === roundId
-                    ? { ...item, status: "revealed", completedAt: Date.now() }
+                    ? { ...item, status: "revealed", completedAt }
                     : item,
             ),
             latestReveal: {
@@ -161,6 +176,9 @@ export const useGameStore = create<GameState>((set, get) => ({
                 betId: round.result.betId,
                 bucketIndex: round.result.bucketIndex,
             },
+            latestResultFeedback: storyEntry,
+            recentResults: [round.result, ...s.recentResults].slice(0, MAX_RECENT),
+            storyEntries: addPlinkoStoryEntry(s.storyEntries, storyEntry),
         }));
 
         return true;
@@ -257,5 +275,10 @@ export const useGameStore = create<GameState>((set, get) => ({
         set({
             autoRuntime: DEFAULT_AUTO_RUNTIME,
         }),
-    clearResults: () => set({ recentResults: [] }),
+    clearResults: () =>
+        set({
+            latestResultFeedback: null,
+            recentResults: [],
+            storyEntries: [],
+        }),
 }));

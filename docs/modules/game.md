@@ -12,8 +12,9 @@ Implemented:
 - Game state is stored in Zustand through `useGameStore`.
 - Current state includes game mode, playback mode, backend request in-flight
   state, keyed active visual rounds with source and visual playback style,
-  latest reveal identity, recent results, Auto settings/runtime state, bet
-  amount, risk, and selected rows.
+  latest reveal identity, visually settled recent results, story/result
+  feedback entries, Auto settings/runtime state, bet amount, risk, and selected
+  rows.
 - Game config is loaded from local `/api/game/config` with TanStack Query.
 - `/api/game/config` proxies to backend `/api/v1/game/config` without auth.
 - `useBetControlsModel` owns shared betting control behavior for manual bet
@@ -88,6 +89,14 @@ Implemented:
   Completion accepts a keyed active visual round once, reveals the latest
   winning bucket, then prunes the completed visual round after the reveal
   cleanup window.
+- The board renders a compact Plinko story bar as a top-right overlay. It shows
+  visually settled results newest-first, caps visible entries at five, and uses
+  multiplier labels styled from the same bucket color model as the Canvas board
+  bucket where the result landed.
+- The board renders a short visual-only result cue after visual completion. The
+  cue shows the signed payout delta and multiplier for the completed round, but
+  it does not own or drive balance, bet validation, Auto stop logic, API state,
+  or session behavior.
 - `GameLayout` structures the authenticated game screen into responsive board
   and controls zones. On desktop, it renders the existing `BetControls` left
   rail. On mobile, it keeps the board first and renders `MobileBetHud` below
@@ -126,8 +135,9 @@ Implemented:
   without showing vertical fallback drops or overloading the renderer.
 - The Canvas renderer keys each animation with the visual round's `roundId`;
   completed rounds still reveal and prune through the shared keyed lifecycle.
-- Displayed balance updates when the backend response returns, not when visual
-  playback completes.
+- Authoritative displayed balance updates when the backend response returns,
+  not when visual playback completes. Story/result feedback is presentation-only
+  and is revealed from the visual completion path.
 - Winning bucket highlight is visual feedback only. Highlight cleanup uses the
   completed visual round's `roundId` so an older cleanup timer cannot clear a
   newer result reveal, and request readiness does not wait for highlight
