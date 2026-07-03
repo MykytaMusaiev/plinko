@@ -44,7 +44,7 @@ interface GameState {
     autoSettings: AutoSettings;
     autoRuntime: AutoRuntime;
 
-    // Bet controls state — shared with MultiplierBar for hover tooltip
+    // Bet controls state shared by controls and the board renderer.
     betAmount: bigint;
     risk: Risk;
     selectedRows: number;
