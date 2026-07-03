@@ -1,10 +1,10 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { REVEAL_MS, useGameStore } from '../model/game.store';
-import { createBoardGeometry } from '../lib/boardGeometry';
-import { MultiplierBar } from './MultiplierBar';
-import { PegGrid } from './PegGrid';
+import { getCanvasRoundPlayback } from '../lib/canvasRoundPlaybackPolicy';
+import { PlinkoCanvasStage } from './PlinkoCanvasStage';
+import { RecentResults } from './RecentResults';
 import type { GameConfig } from '@/shared/types/api.types';
 import type { VisualRound } from '../model/game.store';
 import { useGameAudio } from '../model/useGameAudio';
@@ -13,10 +13,9 @@ interface GameBoardProps {
   config: GameConfig;
 }
 
-const MOBILE_BOARD_MAX_WIDTH = 640;
-
 export function GameBoard({ config }: GameBoardProps) {
   const {
+    risk,
     selectedRows,
     playbackMode,
     activeVisualRounds,
@@ -25,42 +24,9 @@ export function GameBoard({ config }: GameBoardProps) {
     pruneVisualRound,
   } = useGameStore();
   const { playResultSound } = useGameAudio();
-  const frameRef = useRef<HTMLDivElement>(null);
-  const [availableSize, setAvailableSize] = useState({ width: 0, height: 0 });
-
-  useEffect(() => {
-    const frame = frameRef.current;
-    if (!frame) return;
-    const resizeTarget = frame.parentElement ?? frame;
-
-    const resizeObserver = new ResizeObserver(([entry]) => {
-      const nextWidth = Math.round(entry.contentRect.width);
-      const nextHeight = Math.round(entry.contentRect.height);
-
-      setAvailableSize((current) =>
-        current.width === nextWidth && current.height === nextHeight
-          ? current
-          : { width: nextWidth, height: nextHeight },
-      );
-    });
-
-    resizeObserver.observe(resizeTarget);
-
-    return () => resizeObserver.disconnect();
-  }, []);
-
-  const geometry = useMemo(
-    () =>
-      createBoardGeometry({
-        rows: selectedRows,
-        availableWidth: availableSize.width,
-        availableHeight: availableSize.height,
-        layout:
-          availableSize.width > 0 && availableSize.width < MOBILE_BOARD_MAX_WIDTH
-            ? 'mobile'
-            : 'default',
-      }),
-    [availableSize.height, availableSize.width, selectedRows],
+  const bucketMultipliers = useMemo(
+    () => config.payoutTables[risk]?.[String(selectedRows)] ?? [],
+    [config.payoutTables, risk, selectedRows],
   );
 
   const completePlayback = useCallback(
@@ -82,28 +48,62 @@ export function GameBoard({ config }: GameBoardProps) {
   );
 
   useEffect(() => {
-    if (playbackMode !== 'fast') return;
+    const timeoutIds = activeVisualRounds
+      .filter(
+        (round) =>
+          round.status === 'active' &&
+          getCanvasRoundPlayback({
+            playbackMode,
+            playbackStyle: round.playbackStyle,
+            source: round.source,
+          }) === 'quick-settle',
+      )
+      .map((round) => window.setTimeout(() => completePlayback(round), 40));
 
-    activeVisualRounds
-      .filter((round) => round.status === 'active')
-      .forEach((round) => completePlayback(round));
+    return () => {
+      timeoutIds.forEach((timeoutId) => window.clearTimeout(timeoutId));
+    };
   }, [activeVisualRounds, completePlayback, playbackMode]);
 
-  const animatingRounds =
-    playbackMode === 'normal'
-      ? activeVisualRounds.filter((round) => round.status === 'active')
-      : [];
+  const animatingRounds = activeVisualRounds.filter((round) => {
+    if (round.status !== 'active') {
+      return false;
+    }
+
+    const canvasPlayback = getCanvasRoundPlayback({
+      playbackMode,
+      playbackStyle: round.playbackStyle,
+      source: round.source,
+    });
+
+    return canvasPlayback === 'normal-canvas';
+  });
+
+  const bucketFeedbackRounds = activeVisualRounds.filter((round) => {
+    if (round.status !== 'active') {
+      return false;
+    }
+
+    return (
+      getCanvasRoundPlayback({
+        playbackMode,
+        playbackStyle: round.playbackStyle,
+        source: round.source,
+      }) === 'bucket-feedback'
+    );
+  });
 
   return (
-    <div ref={frameRef} className="w-full min-w-0">
-      <div className="mx-auto flex flex-col items-center" style={{ width: geometry.width }}>
-        <PegGrid
-          geometry={geometry}
-          rounds={animatingRounds}
-          onAnimationComplete={completePlayback}
-        />
-        <MultiplierBar config={config} geometry={geometry} />
-      </div>
+    <div className="relative flex h-full min-h-[19rem] w-full min-w-0 flex-1 items-stretch">
+      <PlinkoCanvasStage
+        bucketFeedbackRounds={bucketFeedbackRounds}
+        bucketMultipliers={bucketMultipliers}
+        risk={risk}
+        rowsCount={selectedRows}
+        rounds={animatingRounds}
+        onAnimationComplete={completePlayback}
+      />
+      <RecentResults />
     </div>
   );
 }

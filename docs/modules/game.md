@@ -12,8 +12,9 @@ Implemented:
 - Game state is stored in Zustand through `useGameStore`.
 - Current state includes game mode, playback mode, backend request in-flight
   state, keyed active visual rounds with source and visual playback style,
-  latest reveal identity, recent results, Auto settings/runtime state, bet
-  amount, risk, and selected rows.
+  latest reveal identity, visually settled recent results, story/result
+  feedback entries, Auto settings/runtime state, bet amount, risk, and selected
+  rows.
 - Game config is loaded from local `/api/game/config` with TanStack Query.
 - `/api/game/config` proxies to backend `/api/v1/game/config` without auth.
 - `useBetControlsModel` owns shared betting control behavior for manual bet
@@ -82,11 +83,20 @@ Implemented:
   flight, lets the submitted request finish, enqueues its visual round, updates
   progress/balance, and then stops scheduling further requests.
 - Playback mode is separate from manual/auto game mode. Normal playback runs the
-  board animation, while fast playback skips the full ball animation.
+  full Canvas ball animation, while Manual Fast playback skips ball movement and
+  shows only target-bucket Canvas feedback.
 - Normal and fast playback share the same visual completion contract.
   Completion accepts a keyed active visual round once, reveals the latest
   winning bucket, then prunes the completed visual round after the reveal
   cleanup window.
+- The board renders a compact Plinko story bar as a top-right overlay. It shows
+  visually settled results newest-first, caps visible entries at five, and uses
+  multiplier labels styled from the same bucket color model as the Canvas board
+  bucket where the result landed.
+- The board renders a short visual-only result cue after visual completion. The
+  cue shows the signed payout delta and multiplier for the completed round, but
+  it does not own or drive balance, bet validation, Auto stop logic, API state,
+  or session behavior.
 - `GameLayout` structures the authenticated game screen into responsive board
   and controls zones. On desktop, it renders the existing `BetControls` left
   rail. On mobile, it keeps the board first and renders `MobileBetHud` below
@@ -95,44 +105,39 @@ Implemented:
   navigation outside the Game feature. `GameLayout` fits within that shell
   while preserving the existing desktop left rail, mobile betting HUD, and
   board composition.
-- `GameBoard` owns the visual board composition and renders `PegGrid` with the
-  attached `MultiplierBar` bucket row directly below it.
-- `GameBoard`, `PegGrid`, and `MultiplierBar` share the feature-local board
-  geometry model in `src/features/game/lib/boardGeometry.ts`. The model derives
-  visual boundary peg positions, lane/path slot positions, landing columns,
-  bucket centers, bucket dimensions, and vertical bucket spacing from selected
-  row count and available board size.
-- Board geometry scales progressively by selected row count: lower row counts
-  can use larger peg spacing when the container has room, while 16 rows keep the
-  dense baseline spacing. The same geometry model is used on desktop and
-  mobile; surrounding layout constraints provide the available board size.
-- The geometry model owns final peg row to bucket row spacing, so bucket
-  placement and final landing targets stay aligned when that clearance changes.
-- `GameBoard` passes active visual rounds to `PegGrid` only for normal playback.
-- In fast playback, `GameBoard` completes active visual rounds immediately so
-  Fast remains a no-animation result path.
-- Normal playback uses a feature-local deterministic renderer layer. Backend
-  `BetResponse.path` and `bucketIndex` are converted once per active visual
-  full-drop visual round into a visual animation plan with waypoints, duration,
-  optional contact pulses, and settle fallback timing.
-- The static peg layer is separated from ball runtime animation. `PegGrid`
-  composes a mostly static `PegLayer` with `PlinkoBallLayer`, while ball
-  movement uses precomputed transform keyframes instead of per-waypoint React
-  state updates.
-- Full visual drops traverse geometry-owned lane/path slots, pass near the
-  relevant visual boundary peg for subtle contact feedback, and always use the
-  feature-local board geometry landing target for backend-provided
-  `bucketIndex` as the explicit final bucket-drop waypoint.
+- `GameBoard` owns the visual board composition and renders the feature-local
+  Canvas renderer surface through `PlinkoCanvasStage`.
+- The Canvas renderer is adapted from the reference implementation under
+  `ref/plinko` and loads row-specific trajectory libraries from public assets
+  under `/animations/plinko`.
+- Animation assets are available for rows 8 through 16. Each row asset contains
+  bucket-indexed trajectory variants, and the renderer selects a deterministic
+  variant from the backend bet identity, row count, and target bucket.
+- `BetResponse.path` is adapted from backend `L`/`R` steps into renderer
+  `0`/`1` steps when it is valid. If path metadata is inconsistent, the adapter
+  records warnings and falls back to bucket-correct renderer steps so the visual
+  animation remains driven by the backend-provided `bucketIndex`.
+- `GameBoard` passes active full Normal rounds to the Canvas renderer's ball
+  animation path.
+- In Manual Fast playback, `GameBoard` sends the visual round to the Canvas
+  bucket-feedback path so only the backend target bucket pulses/scales before
+  settlement.
+- Auto Fast and compressed visual rounds keep the quick settlement path so dense
+  runs do not overload the renderer or change Auto pacing.
+- Normal playback uses Canvas ball trajectories and peg/bucket feedback. If
+  asset loading, parsing, trajectory selection, or dispatch fails, the renderer
+  settles the visual round through the existing fallback completion path without
+  repeating the bet request or changing balance/result state.
 - Auto visual playback uses a density policy: Manual rounds always receive full
   drops, while Auto rounds receive full drops only while the active full-Auto
   budget has capacity. Overflow Auto results skip ball travel and resolve
   through the keyed bucket reveal/highlight path so dense runs stay honest
   without showing vertical fallback drops or overloading the renderer.
-- `PegGrid` renders multiple active balls by keying each animation with the
-  visual round's `roundId`; completed rounds still reveal and prune through the
-  shared keyed lifecycle.
-- Displayed balance updates when the backend response returns, not when visual
-  playback completes.
+- The Canvas renderer keys each animation with the visual round's `roundId`;
+  completed rounds still reveal and prune through the shared keyed lifecycle.
+- Authoritative displayed balance updates when the backend response returns,
+  not when visual playback completes. Story/result feedback is presentation-only
+  and is revealed from the visual completion path.
 - Winning bucket highlight is visual feedback only. Highlight cleanup uses the
   completed visual round's `roundId` so an older cleanup timer cannot clear a
   newer result reveal, and request readiness does not wait for highlight
@@ -140,8 +145,8 @@ Implemented:
 - Result audio uses existing `BetResponse` fields. Loss/win is derived from
   `payout` compared with `amount`, and high-win audio is derived from a high
   multiplier threshold.
-- `MultiplierBar` reads the latest reveal from game state to show the winning
-  bucket highlight and renders bucket labels as the attached board bucket row.
+- The Canvas renderer owns bucket label drawing and bucket feedback for the
+  board surface.
 - Balance and logout access are owned by the protected `(game)` app shell so
   they remain available across protected routes.
 
@@ -159,4 +164,6 @@ Unverified:
 
 - Backend payout table semantics beyond the current `GameConfig` TypeScript
   shape.
-- Backend path generation rules beyond the returned `BetResponse.path` string.
+- Exact backend path generation rules beyond the returned `BetResponse.path`
+  string. The Canvas renderer only guarantees bucket-correct animation, not
+  exact visual reproduction of every backend `L`/`R` step.
