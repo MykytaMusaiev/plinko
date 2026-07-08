@@ -1,0 +1,365 @@
+const IDEAL_PEG_GAP = 42;
+const MIN_PEG_GAP = 16;
+const MAX_ROWS = 16;
+const MIN_ROWS = 8;
+const LOW_ROW_GAP_EXPANSION = 0.48;
+
+const IDEAL_ROW_GAP = 42;
+const MIN_ROW_GAP = 18;
+
+const IDEAL_PEG_RADIUS = 5;
+const MIN_PEG_RADIUS = 3;
+
+const IDEAL_BALL_RADIUS = 10;
+const MIN_BALL_RADIUS = 6;
+
+const IDEAL_PAD_TOP = 24;
+const MIN_PAD_TOP = 12;
+
+const IDEAL_BUCKET_HEIGHT = 44;
+const MIN_BUCKET_HEIGHT = 30;
+
+const IDEAL_BUCKET_GAP = 8;
+const MIN_BUCKET_GAP = 3;
+
+const IDEAL_BUCKET_VERTICAL_GAP = 28;
+const MIN_BUCKET_VERTICAL_GAP = 16;
+const MOBILE_HEIGHT_FILL_RATIO = 0.78;
+const MOBILE_MAX_ROW_GAP = 54;
+const LANE_CONTACT_CLEARANCE = 3;
+const LANE_CONTACT_HORIZONTAL_RATIO = 0.92;
+const LANE_CONTACT_MAX_LANE_PROGRESS = 0.82;
+
+interface BoardGeometryInput {
+  rows: number;
+  availableWidth?: number;
+  availableHeight?: number;
+  layout?: 'default' | 'mobile';
+}
+
+export interface BoardPoint {
+  x: number;
+  y: number;
+}
+
+export interface Waypoint extends BoardPoint {
+  hitRow?: number;
+  hitPeg?: number;
+}
+
+export interface PegPosition extends BoardPoint {
+  row: number;
+  peg: number;
+}
+
+export interface LanePosition extends BoardPoint {
+  row: number;
+  lane: number;
+}
+
+export interface LandingColumn extends BoardPoint {
+  index: number;
+}
+
+export interface BucketGeometry {
+  index: number;
+  centerX: number;
+  centerY: number;
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+}
+
+export interface BoardGeometry {
+  rows: number;
+  width: number;
+  pegGridHeight: number;
+  bucketTop: number;
+  bucketHeight: number;
+  bucketVerticalGap: number;
+  pegGap: number;
+  rowGap: number;
+  pegRadius: number;
+  ballRadius: number;
+  padTop: number;
+  centerX: number;
+  landingY: number;
+  pegs: PegPosition[];
+  pegRows: PegPosition[][];
+  laneRows: LanePosition[][];
+  landingColumns: LandingColumn[];
+  buckets: BucketGeometry[];
+}
+
+export function getBucketLandingTarget(
+  geometry: BoardGeometry,
+  bucketIndex: number,
+): LandingColumn | undefined {
+  return geometry.landingColumns[bucketIndex];
+}
+
+export function getLaneContactPeg(
+  geometry: BoardGeometry,
+  row: number,
+  laneIndex: number,
+  direction: string,
+): PegPosition | undefined {
+  const pegIndex = direction === 'R' ? laneIndex + 1 : laneIndex;
+
+  return geometry.pegRows[row]?.[pegIndex];
+}
+
+export function getLaneContactTarget(
+  geometry: BoardGeometry,
+  row: number,
+  laneIndex: number,
+  direction: string,
+): Waypoint | undefined {
+  const lane = geometry.laneRows[row]?.[laneIndex];
+  const peg = getLaneContactPeg(geometry, row, laneIndex, direction);
+
+  if (!lane || !peg) {
+    return undefined;
+  }
+
+  const laneToPegX = Math.abs(peg.x - lane.x);
+  const contactDistance = geometry.ballRadius + geometry.pegRadius + LANE_CONTACT_CLEARANCE;
+  const horizontalOffset = Math.min(
+    contactDistance * LANE_CONTACT_HORIZONTAL_RATIO,
+    laneToPegX * LANE_CONTACT_MAX_LANE_PROGRESS,
+  );
+  const verticalOffset = Math.sqrt(
+    Math.max(contactDistance ** 2 - horizontalOffset ** 2, 0),
+  );
+  const contactSide = direction === 'R' ? -1 : 1;
+
+  return {
+    x: peg.x + horizontalOffset * contactSide,
+    y: peg.y - verticalOffset,
+    hitRow: peg.row,
+    hitPeg: peg.peg,
+  };
+}
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(Math.max(value, min), max);
+}
+
+function scaleValue(value: number, scale: number, min: number): number {
+  return Math.max(min, value * scale);
+}
+
+function getRowExpansion(rows: number): number {
+  return clamp((MAX_ROWS - rows) / (MAX_ROWS - MIN_ROWS), 0, 1);
+}
+
+function getMaxPegGap(rows: number): number {
+  return IDEAL_PEG_GAP * (1 + getRowExpansion(rows) * LOW_ROW_GAP_EXPANSION);
+}
+
+function getScaledMetrics(pegGap: number) {
+  const scale = pegGap / IDEAL_PEG_GAP;
+
+  return {
+    rowGap: scaleValue(IDEAL_ROW_GAP, scale, MIN_ROW_GAP),
+    pegRadius: scaleValue(IDEAL_PEG_RADIUS, scale, MIN_PEG_RADIUS),
+    ballRadius: scaleValue(IDEAL_BALL_RADIUS, scale, MIN_BALL_RADIUS),
+    padTop: scaleValue(IDEAL_PAD_TOP, scale, MIN_PAD_TOP),
+    bucketHeight: scaleValue(IDEAL_BUCKET_HEIGHT, scale, MIN_BUCKET_HEIGHT),
+    bucketGap: scaleValue(IDEAL_BUCKET_GAP, scale, MIN_BUCKET_GAP),
+    bucketVerticalGap: scaleValue(
+      IDEAL_BUCKET_VERTICAL_GAP,
+      scale,
+      MIN_BUCKET_VERTICAL_GAP,
+    ),
+  };
+}
+
+function getTotalHeight(rows: number, pegGap: number): number {
+  const { rowGap, pegRadius, padTop, bucketHeight, bucketVerticalGap } =
+    getScaledMetrics(pegGap);
+
+  return padTop + (rows - 1) * rowGap + pegRadius + bucketVerticalGap + bucketHeight;
+}
+
+function getTotalHeightWithRowGap(
+  rows: number,
+  rowGap: number,
+  metrics: ReturnType<typeof getScaledMetrics>,
+): number {
+  const { pegRadius, padTop, bucketHeight, bucketVerticalGap } = metrics;
+
+  return padTop + (rows - 1) * rowGap + pegRadius + bucketVerticalGap + bucketHeight;
+}
+
+function fitMobileRowGapToAvailableHeight(
+  rows: number,
+  rowGap: number,
+  metrics: ReturnType<typeof getScaledMetrics>,
+  availableHeight?: number,
+): number {
+  if (!availableHeight || availableHeight <= 0 || rows <= 1) {
+    return rowGap;
+  }
+
+  const targetHeight = availableHeight * MOBILE_HEIGHT_FILL_RATIO;
+  if (getTotalHeightWithRowGap(rows, rowGap, metrics) >= targetHeight) {
+    return rowGap;
+  }
+
+  const availableForRows =
+    targetHeight -
+    metrics.padTop -
+    metrics.pegRadius -
+    metrics.bucketVerticalGap -
+    metrics.bucketHeight;
+
+  return clamp(availableForRows / (rows - 1), rowGap, MOBILE_MAX_ROW_GAP);
+}
+
+function fitPegGapToAvailableSize(
+  rows: number,
+  maxPegGap: number,
+  availableWidth?: number,
+  availableHeight?: number,
+): number {
+  const widthLimit = availableWidth && availableWidth > 0 ? availableWidth : Infinity;
+  const heightLimit = availableHeight && availableHeight > 0 ? availableHeight : Infinity;
+  const widthPegGap = widthLimit === Infinity ? maxPegGap : widthLimit / (rows + 3);
+  let high = Math.min(maxPegGap, widthPegGap);
+
+  if (heightLimit !== Infinity && getTotalHeight(rows, high) > heightLimit) {
+    let low = Math.min(MIN_PEG_GAP, high);
+
+    for (let i = 0; i < 16; i++) {
+      const mid = (low + high) / 2;
+
+      if (getTotalHeight(rows, mid) > heightLimit) {
+        high = mid;
+      } else {
+        low = mid;
+      }
+    }
+
+    return low;
+  }
+
+  return high;
+}
+
+export function createBoardGeometry({
+  rows,
+  availableWidth,
+  availableHeight,
+  layout = 'default',
+}: BoardGeometryInput): BoardGeometry {
+  const maxPegGap = getMaxPegGap(rows);
+  const pegGap = fitPegGapToAvailableSize(
+    rows,
+    maxPegGap,
+    availableWidth,
+    availableHeight,
+  );
+  const scaledMetrics = getScaledMetrics(pegGap);
+  const {
+    rowGap,
+    pegRadius,
+    ballRadius,
+    padTop,
+    bucketHeight,
+    bucketGap,
+    bucketVerticalGap,
+  } = {
+    ...scaledMetrics,
+    rowGap:
+      layout === 'mobile'
+        ? fitMobileRowGapToAvailableHeight(
+            rows,
+            scaledMetrics.rowGap,
+            scaledMetrics,
+            availableHeight,
+          )
+        : scaledMetrics.rowGap,
+  };
+
+  const width = (rows + 3) * pegGap;
+  const centerX = width / 2;
+  const pegRows: PegPosition[][] = [];
+  const laneRows: LanePosition[][] = [];
+  const pegs: PegPosition[] = [];
+
+  for (let row = 0; row < rows; row++) {
+    const rowPegs: PegPosition[] = [];
+
+    for (let peg = 0; peg <= row + 1; peg++) {
+      const position = {
+        row,
+        peg,
+        x: centerX + (peg - (row + 1) / 2) * pegGap,
+        y: padTop + row * rowGap,
+      };
+
+      rowPegs.push(position);
+      pegs.push(position);
+    }
+
+    pegRows.push(rowPegs);
+
+    const rowLanes: LanePosition[] = [];
+
+    for (let lane = 0; lane <= row; lane++) {
+      rowLanes.push({
+        row,
+        lane,
+        x: centerX + (lane - row / 2) * pegGap,
+        y: padTop + row * rowGap,
+      });
+    }
+
+    laneRows.push(rowLanes);
+  }
+
+  const finalPegY = padTop + (rows - 1) * rowGap;
+  const bucketTop = finalPegY + pegRadius + bucketVerticalGap;
+  const bucketWidth = Math.max(pegGap * 0.72, pegGap - bucketGap);
+  const bucketCenterY = bucketHeight / 2;
+  const landingY = bucketTop - bucketVerticalGap / 2;
+
+  const landingColumns: LandingColumn[] = Array.from({ length: rows + 1 }, (_, index) => ({
+    index,
+    x: centerX + (index - rows / 2) * pegGap,
+    y: landingY,
+  }));
+
+  const buckets: BucketGeometry[] = landingColumns.map((column) => ({
+    index: column.index,
+    centerX: column.x,
+    centerY: bucketCenterY,
+    left: column.x - bucketWidth / 2,
+    top: 0,
+    width: bucketWidth,
+    height: bucketHeight,
+  }));
+
+  return {
+    rows,
+    width,
+    pegGridHeight: bucketTop,
+    bucketTop,
+    bucketHeight,
+    bucketVerticalGap,
+    pegGap,
+    rowGap,
+    pegRadius,
+    ballRadius,
+    padTop,
+    centerX,
+    landingY,
+    pegs,
+    pegRows,
+    laneRows,
+    landingColumns,
+    buckets,
+  };
+}

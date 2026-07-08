@@ -1,0 +1,138 @@
+---
+name: pre-commit
+description: Run a pre-commit readiness check for the Plinko repository. Use before committing or when asked to verify readiness by inspecting git status/diff, running lint and available validation scripts, checking API boundary/docs freshness scripts if present, and reporting Ready or Blocked without committing.
+---
+
+# Pre-Commit
+
+## Goal
+
+Assess whether current changes are ready to commit without committing
+automatically.
+
+## When to use
+
+- The user asks for pre-commit checks.
+- The user asks whether a phase can be committed.
+- Implementation is complete and validation is needed.
+
+## When not to use
+
+- The user asks for code review only.
+- The user asks to commit directly without validation.
+
+## Required context
+
+- `git status --short`.
+- Relevant `git diff`.
+- Active task artifact under `.ai/tasks/active/`.
+- Branch mode fields and current branch.
+- Approved editable files and non-goals from the active task artifact.
+- `package.json` scripts.
+- Presence or absence of validation scripts.
+- Review/code-quality gate evidence when code, UI, refactor, or
+  architecture-sensitive changes require semantic review.
+- Approved suppression or framework-bypass rationale from the active task
+  artifact when changed files contain bypass markers.
+- UI QA evidence when the active task artifact says UI QA is required.
+
+## Restrictions
+
+- Never commit automatically.
+- Do not modify files unless the user explicitly asks for fixes.
+- Do not create branches, open PRs, merge PRs, delete branches, archive
+  artifacts, stage files, or commit.
+- Do not invent validation scripts.
+- Do not replace semantic review; confirm review-gate evidence only.
+- Do not perform stack primitive semantic review; only scan for obvious bypass
+  markers and require recorded approval/rationale.
+- Do not measure rerenders, require exact render counts, or perform profiler
+  automation.
+- Do not treat an archived, missing, or stale task artifact as ready.
+- Do not approve unexpected changed files without explicit scope approval.
+- Report skipped checks with reasons.
+
+## Workflow
+
+1. Inspect `git status --short`.
+2. Inspect relevant diffs.
+3. Locate the active task artifact for the implementation.
+4. Confirm the artifact is current, not archived, and names the approved
+   editable files, non-goals, branch mode, docs rationale, validation, risks,
+   and handoff.
+5. Verify the branch invariant mechanically:
+   - Branch mode is present.
+   - For PR-mode, the current branch matches the recorded task branch and does
+     not match the recorded base branch.
+   - For local/no-PR mode, an explicit local/no-PR rationale is present.
+6. Compare changed files against the approved editable scope.
+   - For task artifact archive/move commits, confirm both sides of the move are
+     present in the staged or to-be-committed change: the
+     `.ai/tasks/active/...` deletion and the `.ai/tasks/archived/...`
+     addition.
+   - Prefer staging artifact archive/move commits with `git add -A .ai/tasks`.
+     Do not stage only the archived artifact file.
+7. Mechanically scan changed text files for obvious suppression or framework
+   bypass markers: `eslint-disable`, `@ts-ignore`, `@ts-expect-error`,
+   `@ts-nocheck`, `biome-ignore`, raw `<img`, `no-img-element`, and
+   `NEXT_PUBLIC_API_BASE`.
+   - Block when markers are found unless the active task artifact records
+     explicit approval and rationale for each intentional bypass.
+   - Treat scan false positives as requiring a short task-artifact rationale,
+     not as permission to ignore the scan.
+8. Confirm review/code-quality gate evidence is present or explicitly not
+   applicable.
+9. If the task artifact says UI QA is required, verify that UI QA evidence is
+   recorded. Do not measure rerenders or require exact render counts.
+10. Run `pnpm lint` when applicable.
+11. Run validation scripts if present.
+12. Run `check-api-boundary.sh` if present.
+13. Run `check-docs-freshness.sh` if present.
+14. Report Ready only when required checks pass or are explicitly not
+   applicable.
+15. Report Blocked when validation fails, scope is unclear, the task artifact is
+   missing or stale, branch mode is missing, PR-mode branch fields do not match
+   the current branch, local/no-PR rationale is missing, changed files exceed
+   approved scope, suppression/bypass markers lack approved rationale,
+   review-gate evidence is missing, UI QA evidence is missing when required, or
+   required checks cannot run.
+16. After an artifact archive commit, verify the commit contains both sides of
+    the move with `git show --name-status --oneline --stat HEAD`; the expected
+    archive commit shows the active artifact removed and the archived artifact
+    added. Lifecycle closure is not complete when the artifact move is only
+    partially staged or committed.
+
+## Output format
+
+- Ready / Blocked
+- Files changed
+- Task artifact status
+- Branch invariant status
+- Commands run
+- Validation result
+- Suppression/bypass scan result
+- Skipped checks and reasons
+- UI QA evidence status when required
+- Risks
+- Suggested Conventional Commit message
+
+## Common mistakes
+
+- Committing automatically.
+- Running scripts that do not exist.
+- Ignoring unstaged or unrelated changes.
+- Creating or switching branches during pre-commit instead of reporting the
+  branch invariant status.
+- Performing semantic code review instead of checking for review evidence.
+- Treating a clean bypass-marker scan as proof that stack primitive review is
+  complete.
+- Allowing suppression or framework-bypass markers without explicit
+  task-artifact approval and rationale.
+- Performing UI render/performance analysis instead of checking for recorded UI
+  QA evidence.
+- Skipping changed-files-vs-approved-scope comparison.
+- Accepting missing, stale, or archived task artifacts.
+- Treating skipped validation as passing.
+- Forgetting API-boundary and docs-freshness checks when scripts exist.
+- Staging only `.ai/tasks/archived/...` for artifact archive commits and
+  missing the corresponding `.ai/tasks/active/...` deletion.
